@@ -3,50 +3,45 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:models="clr-namespace:OrderWiseErp.App.Models"
+        xmlns:vm="clr-namespace:OrderWiseErp.App.ViewModels"
+        xmlns:views="clr-namespace:OrderWiseErp.App.Views"
         mc:Ignorable="d"
         Title="OrderWise ERP - Phase 1 MVP"
-        Width="1300"
-        Height="780"
-        MinWidth="1024"
-        MinHeight="680"
+        Width="1400"
+        Height="820"
+        MinWidth="1100"
+        MinHeight="720"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type models:ModuleInfo}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <Border Padding="16"
-                        Margin="0,0,0,12"
-                        Background="White"
-                        BorderThickness="1"
-                        BorderBrush="#E5E7EB"
-                        CornerRadius="8">
-                    <StackPanel>
-                        <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding Subtitle}" Foreground="#6B7280" Margin="0,6,0,0" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-
-                <DataGrid Grid.Row="1"
-                          ItemsSource="{Binding Screens}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          CanUserAddRows="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Planned Screen" Binding="{Binding}" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <TextBlock Grid.Row="2"
-                           Margin="0,10,0,0"
-                           Foreground="#6B7280"
-                           Text="MVP placeholders only. Wire commands and persistence in next phase." />
-            </Grid>
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <views:DashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProjectsViewModel}">
+            <views:ProjectsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ContactsViewModel}">
+            <views:ContactsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProductsViewModel}">
+            <views:ProductsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PlaceholderModuleViewModel}">
+            <Border Padding="16"
+                    Background="White"
+                    BorderThickness="1"
+                    BorderBrush="#E5E7EB"
+                    CornerRadius="8">
+                <StackPanel>
+                    <TextBlock Text="{Binding ModuleName}" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Note}"
+                               Margin="0,8,0,0"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               TextWrapping="Wrap" />
+                    <TextBlock Margin="0,8,0,0"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               Text="{Binding LastUpdated, StringFormat='Last data change: {0:G}'}" />
+                </StackPanel>
+            </Border>
         </DataTemplate>
     </Window.Resources>
 
@@ -60,7 +55,7 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
                     <TextBlock Text="OrderWise ERP" FontSize="22" FontWeight="SemiBold" Foreground="#E5E7EB" />
-                    <TextBlock Text="WPF Phase 1 Scaffold" FontSize="13" Foreground="#9CA3AF" Margin="0,2,0,0" />
+                    <TextBlock Text="Phase 1 Data Entry MVP" FontSize="13" Foreground="#9CA3AF" Margin="0,2,0,0" />
                 </StackPanel>
 
                 <ListBox ItemsSource="{Binding Modules}"
@@ -103,10 +98,10 @@
 
         <DockPanel Grid.Column="1" Margin="24">
             <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
-                <TextBlock Text="{Binding CurrentTitle}" FontSize="24" FontWeight="SemiBold" />
-                <TextBlock Text="{Binding CurrentSubtitle}" Foreground="#6B7280" />
+                <TextBlock Text="{Binding PageTitle}" FontSize="24" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding PageSubtitle}" Foreground="#6B7280" />
             </StackPanel>
-            <ContentControl Content="{Binding SelectedModule}" />
+            <ContentControl Content="{Binding CurrentViewModel}" />
         </DockPanel>
     </Grid>
 </Window>

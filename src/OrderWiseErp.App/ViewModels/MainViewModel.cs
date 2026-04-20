@@ -1,106 +1,100 @@
 using System.Collections.ObjectModel;
 using OrderWiseErp.App.Infrastructure;
 using OrderWiseErp.App.Models;
+using OrderWiseErp.App.Services;
 
 namespace OrderWiseErp.App.ViewModels;
 
 public sealed class MainViewModel : ObservableObject
 {
-    private ModuleInfo? _selectedModule;
+    private readonly DashboardViewModel _dashboardViewModel;
+    private readonly ProjectsViewModel _projectsViewModel;
+    private readonly ContactsViewModel _contactsViewModel;
+    private readonly ProductsViewModel _productsViewModel;
+    private NavigationItem? _selectedModule;
+    private object? _currentViewModel;
+    private string _pageTitle = string.Empty;
+    private string _pageSubtitle = string.Empty;
+    private readonly PlaceholderModuleViewModel _purchasesPlaceholder = new("Purchases", "Planned in next iteration");
+    private readonly PlaceholderModuleViewModel _salesPlaceholder = new("Sales", "Planned in next iteration");
+    private readonly PlaceholderModuleViewModel _paymentsPlaceholder = new("Payments", "Planned in next iteration");
+    private readonly PlaceholderModuleViewModel _expensesPlaceholder = new("Expenses", "Planned in next iteration");
+    private readonly PlaceholderModuleViewModel _stockPlaceholder = new("Stock", "Planned in next iteration");
+    private readonly PlaceholderModuleViewModel _reportsPlaceholder = new("Reports", "Planned in next iteration");
 
-    public MainViewModel()
+    public MainViewModel(IAppDataService dataService)
     {
-        Modules = new ObservableCollection<ModuleInfo>
+        _projectsViewModel = new ProjectsViewModel(dataService);
+        _contactsViewModel = new ContactsViewModel(dataService);
+        _productsViewModel = new ProductsViewModel(dataService);
+        _dashboardViewModel = new DashboardViewModel(dataService);
+
+        Modules = new ObservableCollection<NavigationItem>
         {
-            new("Dashboard", "Overview and quick metrics", new[]
-            {
-                "Open Projects",
-                "Total Receivable",
-                "Total Payable",
-                "Input/Output VAT snapshot",
-                "Cash and bank positions"
-            }),
-            new("Projects", "Order-wise setup and tracking", new[]
-            {
-                "Project list",
-                "Add/Edit project",
-                "Project ledger view"
-            }),
-            new("Contacts", "Customer / Supplier / Both", new[]
-            {
-                "Contact list",
-                "Add/Edit contact",
-                "Filter by contact type"
-            }),
-            new("Products", "Catalog with VAT/ADT support", new[]
-            {
-                "Product list",
-                "Add/Edit product",
-                "SKU and tax setup"
-            }),
-            new("Purchases", "Supplier invoices with item lines", new[]
-            {
-                "Purchase list",
-                "Purchase add/edit",
-                "Print/preview"
-            }),
-            new("Sales", "Customer invoices with item lines", new[]
-            {
-                "Sales list",
-                "Sales add/edit",
-                "Print/preview"
-            }),
-            new("Payments", "Receipt/payment and allocation", new[]
-            {
-                "Payments list",
-                "Payment add/edit",
-                "Allocation to purchases/sales"
-            }),
-            new("Expenses", "Project-linked expenses", new[]
-            {
-                "Expense list",
-                "Expense add/edit",
-                "VAT-aware expense entries"
-            }),
-            new("Stock", "Adjustments and transfers", new[]
-            {
-                "Stock adjustment list/add",
-                "Stock transfer list/add",
-                "Location-based stock flow"
-            }),
-            new("Reports", "Phase-1 report placeholders", new[]
-            {
-                "Cash Flow",
-                "Project P&L / Overall P&L",
-                "Expense and Sales/Purchase reports",
-                "Input/Output VAT report"
-            })
+            new NavigationItem("Dashboard", "Overview and quick metrics", _dashboardViewModel),
+            new NavigationItem("Projects", "Create and manage order-wise projects", _projectsViewModel),
+            new NavigationItem("Contacts", "Customers, suppliers, and both", _contactsViewModel),
+            new NavigationItem("Products", "Products with pricing and tax fields", _productsViewModel),
+            new NavigationItem("Purchases", "Phase 2: Purchase invoice entry", _purchasesPlaceholder),
+            new NavigationItem("Sales", "Phase 2: Sales invoice entry", _salesPlaceholder),
+            new NavigationItem("Payments", "Phase 2: Payment and allocation", _paymentsPlaceholder),
+            new NavigationItem("Expenses", "Phase 2: Expense vouchers", _expensesPlaceholder),
+            new NavigationItem("Stock", "Phase 2: Stock transfers and adjustments", _stockPlaceholder),
+            new NavigationItem("Reports", "Phase 2: Financial and tax reports", _reportsPlaceholder)
         };
 
+        _projectsViewModel.DataChanged += OnDataChanged;
+        _contactsViewModel.DataChanged += OnDataChanged;
+        _productsViewModel.DataChanged += OnDataChanged;
+
+        _dashboardViewModel.Refresh();
         SelectedModule = Modules[0];
     }
 
-    public ObservableCollection<ModuleInfo> Modules { get; }
+    public ObservableCollection<NavigationItem> Modules { get; }
 
-    public ModuleInfo? SelectedModule
+    public NavigationItem? SelectedModule
     {
         get => _selectedModule;
         set
         {
-            if (!SetProperty(ref _selectedModule, value))
+            if (!SetProperty(ref _selectedModule, value) || value is null)
             {
                 return;
             }
 
-            OnPropertyChanged(nameof(CurrentTitle));
-            OnPropertyChanged(nameof(CurrentSubtitle));
-            OnPropertyChanged(nameof(CurrentScreens));
+            PageTitle = value.Name;
+            PageSubtitle = value.Subtitle;
+            CurrentViewModel = value.ViewModel;
         }
     }
 
-    public string CurrentTitle => SelectedModule?.Name ?? string.Empty;
+    public object? CurrentViewModel
+    {
+        get => _currentViewModel;
+        private set => SetProperty(ref _currentViewModel, value);
+    }
 
-    public string CurrentSubtitle => SelectedModule?.Subtitle ?? string.Empty;
+    public string PageTitle
+    {
+        get => _pageTitle;
+        private set => SetProperty(ref _pageTitle, value);
+    }
 
-    public IReadOnlyList<string> CurrentScreens => SelectedModule?.Screens ?? Array.Empty<string>();
+    public string PageSubtitle
+    {
+        get => _pageSubtitle;
+        private set => SetProperty(ref _pageSubtitle, value);
+    }
+
+    private void OnDataChanged()
+    {
+        _dashboardViewModel.Refresh();
+        _purchasesPlaceholder.LastUpdated = DateTime.Now;
+        _salesPlaceholder.LastUpdated = DateTime.Now;
+        _paymentsPlaceholder.LastUpdated = DateTime.Now;
+        _expensesPlaceholder.LastUpdated = DateTime.Now;
+        _stockPlaceholder.LastUpdated = DateTime.Now;
+        _reportsPlaceholder.LastUpdated = DateTime.Now;
+    }
 }

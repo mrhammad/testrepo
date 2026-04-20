@@ -20,6 +20,15 @@ This repository now includes a Windows WPF MVVM scaffold for your order-wise ERP
 9. Stock
 10. Reports
 
+## Implemented data-entry modules (current iteration)
+
+- Dashboard counters (bound to live in-memory collections)
+- Projects CRUD (list, create, edit, delete)
+- Contacts CRUD with filtering and search
+- Products CRUD with pricing/tax inputs
+
+Other modules are currently represented as planned placeholders in navigation.
+
 ## Notes
 
 - This cloud runner does not have the .NET SDK installed, so build verification could not run here.
