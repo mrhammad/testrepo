@@ -10,6 +10,10 @@ public interface IAppDataService
 
     IReadOnlyList<Product> Products { get; }
 
+    IReadOnlyList<Purchase> Purchases { get; }
+
+    IReadOnlyList<Sale> Sales { get; }
+
     IReadOnlyList<Project> GetProjects();
     IReadOnlyList<Contact> GetContacts();
     IReadOnlyList<Product> GetProducts();
@@ -25,4 +29,14 @@ public interface IAppDataService
     Product AddProduct(Product product);
     bool UpdateProduct(Product product);
     bool DeleteProduct(int productId);
+
+    IReadOnlyList<Purchase> GetPurchases();
+    Purchase AddPurchase(Purchase purchase);
+    bool UpdatePurchase(Purchase purchase);
+    bool DeletePurchase(int purchaseId);
+
+    IReadOnlyList<Sale> GetSales();
+    Sale AddSale(Sale sale);
+    bool UpdateSale(Sale sale);
+    bool DeleteSale(int saleId);
 }

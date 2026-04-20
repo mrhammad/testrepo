@@ -10,7 +10,11 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        IAppDataService dataService = new InMemoryAppDataService();
+        var dataFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "OrderWiseErp");
+        var dataFilePath = Path.Combine(dataFolder, "phase1-data.json");
+        IAppDataService dataService = new JsonFileAppDataService(dataFilePath);
         var mainViewModel = new MainViewModel(dataService);
         var mainWindow = new MainWindow(mainViewModel);
         mainWindow.Show();

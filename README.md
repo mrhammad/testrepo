@@ -22,12 +22,23 @@ This repository now includes a Windows WPF MVVM scaffold for your order-wise ERP
 
 ## Implemented data-entry modules (current iteration)
 
-- Dashboard counters (bound to live in-memory collections)
+- Dashboard counters (bound to persisted local data)
 - Projects CRUD (list, create, edit, delete)
 - Contacts CRUD with filtering and search
 - Products CRUD with pricing/tax inputs
+- Purchases CRUD (invoice header + multi-line items with VAT, duty, income tax totals)
+- Sales CRUD (invoice header + multi-line items with discount and VAT totals)
 
-Other modules are currently represented as planned placeholders in navigation.
+## Persistence
+
+- App data is stored in a local JSON file:
+  - `%LOCALAPPDATA%/OrderWiseErp/phase1-data.json` on Windows
+- Current storage includes:
+  - Projects
+  - Contacts
+  - Products
+  - Purchases (with items)
+  - Sales (with items)
 
 ## Notes
 

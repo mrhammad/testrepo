@@ -24,8 +24,10 @@ public sealed class DashboardViewModel : ObservableObject
         _tiles.Add(new DashboardTile("Projects", _dataService.Projects.Count.ToString()));
         _tiles.Add(new DashboardTile("Contacts", _dataService.Contacts.Count.ToString()));
         _tiles.Add(new DashboardTile("Products", _dataService.Products.Count.ToString()));
-        _tiles.Add(new DashboardTile("Modules Implemented", "3"));
-        _tiles.Add(new DashboardTile("Next Modules", "Purchases / Sales / Payments"));
+        _tiles.Add(new DashboardTile("Purchases", _dataService.Purchases.Count.ToString()));
+        _tiles.Add(new DashboardTile("Sales", _dataService.Sales.Count.ToString()));
+        _tiles.Add(new DashboardTile("Modules Implemented", "7"));
+        _tiles.Add(new DashboardTile("Next Modules", "Payments / Expenses / Stock / Reports"));
     }
 
     public sealed class DashboardTile

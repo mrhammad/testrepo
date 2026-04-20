@@ -25,6 +25,12 @@
         <DataTemplate DataType="{x:Type vm:ProductsViewModel}">
             <views:ProductsView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PurchasesViewModel}">
+            <views:PurchasesView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SalesViewModel}">
+            <views:SalesView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:PlaceholderModuleViewModel}">
             <Border Padding="16"
                     Background="White"
