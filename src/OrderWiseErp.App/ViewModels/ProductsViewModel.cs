@@ -16,10 +16,15 @@ public sealed class ProductsViewModel : ObservableObject
     private string _unitInput = "Nos";
     private string _salePriceInput = string.Empty;
     private string _costInput = string.Empty;
+    private string _stockAccountInput = string.Empty;
+    private string _saleDiscountInput = "0";
+    private string _purchaseDiscountInput = "0";
+    private string _weightInput = "0";
     private string _vatRateInput = "5";
     private string _adtRateInput = "0";
     private string _lowStockLevelInput = string.Empty;
     private string _binLocationInput = string.Empty;
+    private string _notesInput = string.Empty;
     private string _message = "Ready";
 
     public ProductsViewModel(IAppDataService dataService)
@@ -63,10 +68,15 @@ public sealed class ProductsViewModel : ObservableObject
                 UnitInput = string.IsNullOrWhiteSpace(value.Unit) ? Units[0] : value.Unit;
                 SalePriceInput = value.SalePrice.ToString("0.##");
                 CostInput = value.Cost.ToString("0.##");
+                StockAccountInput = value.StockAccount;
+                SaleDiscountInput = value.SaleDiscount.ToString("0.##");
+                PurchaseDiscountInput = value.PurchaseDiscount.ToString("0.##");
+                WeightInput = value.Weight.ToString("0.##");
                 VatRateInput = value.VatRate.ToString("0.##");
                 AdtRateInput = value.AdtRate.ToString("0.##");
                 LowStockLevelInput = value.LowStockLevel.ToString();
                 BinLocationInput = value.BinLocation;
+                NotesInput = value.Notes;
             }
 
             DeleteCommand.NotifyCanExecuteChanged();
@@ -121,6 +131,30 @@ public sealed class ProductsViewModel : ObservableObject
         set => SetProperty(ref _costInput, value);
     }
 
+    public string StockAccountInput
+    {
+        get => _stockAccountInput;
+        set => SetProperty(ref _stockAccountInput, value);
+    }
+
+    public string SaleDiscountInput
+    {
+        get => _saleDiscountInput;
+        set => SetProperty(ref _saleDiscountInput, value);
+    }
+
+    public string PurchaseDiscountInput
+    {
+        get => _purchaseDiscountInput;
+        set => SetProperty(ref _purchaseDiscountInput, value);
+    }
+
+    public string WeightInput
+    {
+        get => _weightInput;
+        set => SetProperty(ref _weightInput, value);
+    }
+
     public string VatRateInput
     {
         get => _vatRateInput;
@@ -145,6 +179,12 @@ public sealed class ProductsViewModel : ObservableObject
         set => SetProperty(ref _binLocationInput, value);
     }
 
+    public string NotesInput
+    {
+        get => _notesInput;
+        set => SetProperty(ref _notesInput, value);
+    }
+
     public event Action? DataChanged;
 
     public RelayCommand SaveCommand { get; }
@@ -163,10 +203,13 @@ public sealed class ProductsViewModel : ObservableObject
 
         if (!TryParseDecimal(SalePriceInput, out var salePrice) ||
             !TryParseDecimal(CostInput, out var cost) ||
+            !TryParseDecimal(SaleDiscountInput, out var saleDiscount) ||
+            !TryParseDecimal(PurchaseDiscountInput, out var purchaseDiscount) ||
+            !TryParseDecimal(WeightInput, out var weight) ||
             !TryParseDecimal(VatRateInput, out var vatRate) ||
             !TryParseDecimal(AdtRateInput, out var adtRate))
         {
-            Message = "Sale price, cost, VAT, and ADT must be valid numbers.";
+            Message = "Numeric fields contain invalid values.";
             return;
         }
 
@@ -186,10 +229,15 @@ public sealed class ProductsViewModel : ObservableObject
             Unit = UnitInput,
             SalePrice = salePrice,
             Cost = cost,
+            StockAccount = StockAccountInput.Trim(),
+            SaleDiscount = saleDiscount,
+            PurchaseDiscount = purchaseDiscount,
+            Weight = weight,
             VatRate = vatRate,
             AdtRate = adtRate,
             LowStockLevel = lowStockLevel,
-            BinLocation = BinLocationInput.Trim()
+            BinLocation = BinLocationInput.Trim(),
+            Notes = NotesInput.Trim()
         };
 
         if (model.Id == 0)
@@ -232,10 +280,15 @@ public sealed class ProductsViewModel : ObservableObject
         UnitInput = Units[0];
         SalePriceInput = string.Empty;
         CostInput = string.Empty;
+        StockAccountInput = string.Empty;
+        SaleDiscountInput = "0";
+        PurchaseDiscountInput = "0";
+        WeightInput = "0";
         VatRateInput = "5";
         AdtRateInput = "0";
         LowStockLevelInput = string.Empty;
         BinLocationInput = string.Empty;
+        NotesInput = string.Empty;
         DeleteCommand.NotifyCanExecuteChanged();
     }
 

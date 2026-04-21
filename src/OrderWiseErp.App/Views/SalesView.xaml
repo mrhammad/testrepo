@@ -116,6 +116,7 @@
                             <ColumnDefinition Width="120" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="90" />
+                            <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="90" />
                             <ColumnDefinition Width="90" />
                             <ColumnDefinition Width="90" />
@@ -134,17 +135,20 @@
                                  Text="{Binding QtyInput, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBox Grid.Column="3"
                                  Margin="8,0"
-                                 Text="{Binding RateInput, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{Binding UnitInput, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBox Grid.Column="4"
                                  Margin="8,0"
-                                 Text="{Binding DiscountPercentInput, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{Binding RateInput, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBox Grid.Column="5"
                                  Margin="8,0"
-                                 Text="{Binding VatRateInput, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{Binding DiscountPercentInput, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBox Grid.Column="6"
                                  Margin="8,0"
+                                 Text="{Binding VatRateInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Column="7"
+                                 Margin="8,0"
                                  Text="{Binding ItemDescription, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Grid.Column="7"
+                        <Button Grid.Column="8"
                                 Content="Add Item"
                                 Margin="8,0,0,0"
                                 Command="{Binding AddItemCommand}" />
@@ -160,8 +164,11 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="SKU" Binding="{Binding Sku}" Width="120" />
                         <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*" />
+                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="150" />
                         <DataGridTextColumn Header="Qty" Binding="{Binding Qty, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="70" />
                         <DataGridTextColumn Header="Rate" Binding="{Binding Rate, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N2}" Width="90" />
                         <DataGridTextColumn Header="Disc %" Binding="{Binding DiscountPercent, StringFormat=N2}" Width="90" />
                         <DataGridTextColumn Header="Discount" Binding="{Binding DiscountAmount, StringFormat=N2}" Width="90" />
                         <DataGridTextColumn Header="VAT %" Binding="{Binding VatRate, StringFormat=N2}" Width="90" />

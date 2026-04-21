@@ -13,8 +13,6 @@ public sealed class SalesViewModel : ObservableObject
     private string _statusMessage = "Ready";
 
     private string _invoiceNo = string.Empty;
-    private string _projectNoInput = string.Empty;
-    private string _customerNameInput = string.Empty;
     private int? _selectedProjectId;
     private int? _selectedCustomerId;
     private DateTime _saleDate = DateTime.Today;
@@ -122,18 +120,6 @@ public sealed class SalesViewModel : ObservableObject
         set => SetProperty(ref _invoiceNo, value);
     }
 
-    public string ProjectNoInput
-    {
-        get => _projectNoInput;
-        set => SetProperty(ref _projectNoInput, value);
-    }
-
-    public string CustomerNameInput
-    {
-        get => _customerNameInput;
-        set => SetProperty(ref _customerNameInput, value);
-    }
-
     public int? SelectedProjectId
     {
         get => _selectedProjectId;
@@ -164,10 +150,36 @@ public sealed class SalesViewModel : ObservableObject
         set => SetProperty(ref _termDays, value);
     }
 
+    public string TermDaysInput
+    {
+        get => _termDays.ToString();
+        set
+        {
+            if (!int.TryParse(value, out var parsed))
+            {
+                parsed = 0;
+            }
+
+            SetProperty(ref _termDays, parsed);
+        }
+    }
+
     public string PoNumber
     {
         get => _poNumber;
         set => SetProperty(ref _poNumber, value);
+    }
+
+    public DateTime? DueDateInput
+    {
+        get => DueDate;
+        set => DueDate = value;
+    }
+
+    public string PoNumberInput
+    {
+        get => PoNumber;
+        set => PoNumber = value;
     }
 
     public int? SelectedProductId
@@ -345,12 +357,17 @@ public sealed class SalesViewModel : ObservableObject
             return;
         }
 
+        var selectedProject = Projects.FirstOrDefault(x => x.Id == SelectedProjectId.Value);
+        var selectedCustomer = Customers.FirstOrDefault(x => x.Id == SelectedCustomerId.Value);
+
         var model = new Sale
         {
             Id = SelectedSale?.Id ?? 0,
             InvoiceNo = InvoiceNo.Trim(),
             ProjectId = SelectedProjectId.Value,
+            ProjectNo = selectedProject?.ProjectNo ?? string.Empty,
             CustomerId = SelectedCustomerId.Value,
+            CustomerName = selectedCustomer?.BusinessName ?? string.Empty,
             Date = SaleDate,
             DueDate = DueDate,
             TermDays = TermDays,
@@ -507,6 +524,8 @@ public sealed class SalesViewModel : ObservableObject
     {
         return new SaleItem
         {
+            Id = item.Id,
+            SaleId = item.SaleId,
             ProductId = item.ProductId,
             Sku = item.Sku,
             ProductName = item.ProductName,

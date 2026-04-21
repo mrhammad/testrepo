@@ -269,12 +269,16 @@ public sealed class JsonFileAppDataService : IAppDataService
             return false;
         }
 
+        existing.PurchaseNo = purchase.PurchaseNo;
+        existing.ProjectNo = purchase.ProjectNo;
         existing.ProjectId = purchase.ProjectId;
+        existing.SupplierName = purchase.SupplierName;
         existing.SupplierId = purchase.SupplierId;
         existing.Date = purchase.Date;
         existing.DueDate = purchase.DueDate;
         existing.TermDays = purchase.TermDays;
         existing.PoNumber = purchase.PoNumber;
+        existing.CreatedBy = purchase.CreatedBy;
         existing.Balance = purchase.Balance;
         existing.Items = purchase.Items.Select(ClonePurchaseItem).ToList();
 
@@ -335,7 +339,10 @@ public sealed class JsonFileAppDataService : IAppDataService
             return false;
         }
 
+        existing.InvoiceNo = sale.InvoiceNo;
+        existing.ProjectNo = sale.ProjectNo;
         existing.ProjectId = sale.ProjectId;
+        existing.CustomerName = sale.CustomerName;
         existing.CustomerId = sale.CustomerId;
         existing.Date = sale.Date;
         existing.DueDate = sale.DueDate;
@@ -602,7 +609,10 @@ public sealed class JsonFileAppDataService : IAppDataService
         return new Purchase
         {
             Id = item.Id,
+            PurchaseNo = item.PurchaseNo,
+            ProjectNo = item.ProjectNo,
             ProjectId = item.ProjectId,
+            SupplierName = item.SupplierName,
             SupplierId = item.SupplierId,
             Date = item.Date,
             DueDate = item.DueDate,
@@ -610,6 +620,7 @@ public sealed class JsonFileAppDataService : IAppDataService
             PoNumber = item.PoNumber,
             TotalAmount = item.TotalAmount,
             Balance = item.Balance,
+            CreatedBy = item.CreatedBy,
             Items = item.Items.Select(ClonePurchaseItem).ToList()
         };
     }
@@ -621,6 +632,8 @@ public sealed class JsonFileAppDataService : IAppDataService
             Id = item.Id,
             PurchaseId = item.PurchaseId,
             ProductId = item.ProductId,
+            Sku = item.Sku,
+            ProductName = item.ProductName,
             Description = item.Description,
             Qty = item.Qty,
             Unit = item.Unit,
@@ -640,7 +653,10 @@ public sealed class JsonFileAppDataService : IAppDataService
         return new Sale
         {
             Id = item.Id,
+            InvoiceNo = item.InvoiceNo,
+            ProjectNo = item.ProjectNo,
             ProjectId = item.ProjectId,
+            CustomerName = item.CustomerName,
             CustomerId = item.CustomerId,
             Date = item.Date,
             DueDate = item.DueDate,
@@ -659,6 +675,8 @@ public sealed class JsonFileAppDataService : IAppDataService
             Id = item.Id,
             SaleId = item.SaleId,
             ProductId = item.ProductId,
+            Sku = item.Sku,
+            ProductName = item.ProductName,
             Description = item.Description,
             Qty = item.Qty,
             Unit = item.Unit,

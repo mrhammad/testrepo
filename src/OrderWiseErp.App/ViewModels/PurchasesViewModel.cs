@@ -23,8 +23,11 @@ public sealed class PurchasesViewModel : ObservableObject
     private string _poNumberInput = string.Empty;
     private string _termDaysInput = string.Empty;
     private string _itemNameInput = string.Empty;
+    private string _itemSkuInput = string.Empty;
     private string _itemQtyInput = string.Empty;
     private string _itemRateInput = string.Empty;
+    private string _itemUnitInput = "Nos";
+    private string _itemDescriptionInput = string.Empty;
     private string _itemVatRateInput = "5";
     private string _itemDutyRateInput = string.Empty;
     private string _itemIncomeTaxRateInput = string.Empty;
@@ -173,6 +176,12 @@ public sealed class PurchasesViewModel : ObservableObject
         set => SetProperty(ref _itemNameInput, value);
     }
 
+    public string ItemSkuInput
+    {
+        get => _itemSkuInput;
+        set => SetProperty(ref _itemSkuInput, value);
+    }
+
     public string ItemQtyInput
     {
         get => _itemQtyInput;
@@ -183,6 +192,18 @@ public sealed class PurchasesViewModel : ObservableObject
     {
         get => _itemRateInput;
         set => SetProperty(ref _itemRateInput, value);
+    }
+
+    public string ItemUnitInput
+    {
+        get => _itemUnitInput;
+        set => SetProperty(ref _itemUnitInput, value);
+    }
+
+    public string ItemDescriptionInput
+    {
+        get => _itemDescriptionInput;
+        set => SetProperty(ref _itemDescriptionInput, value);
     }
 
     public string ItemVatRateInput
@@ -311,7 +332,10 @@ public sealed class PurchasesViewModel : ObservableObject
         DraftItems.Clear();
         SelectedDraftItem = null;
         ItemNameInput = ProductNames.FirstOrDefault() ?? string.Empty;
+        ItemSkuInput = string.Empty;
+        ItemDescriptionInput = string.Empty;
         ItemQtyInput = string.Empty;
+        ItemUnitInput = "Nos";
         ItemRateInput = string.Empty;
         ItemVatRateInput = "5";
         ItemDutyRateInput = string.Empty;
@@ -339,12 +363,22 @@ public sealed class PurchasesViewModel : ObservableObject
             return;
         }
 
+        var projects = _dataService.GetProjects();
+        var suppliers = _dataService.GetContacts();
+        var project = projects.FirstOrDefault(x =>
+            string.Equals(x.ProjectNo, ProjectNoInput.Trim(), StringComparison.OrdinalIgnoreCase));
+        var supplier = suppliers.FirstOrDefault(x =>
+            (x.ContactType is "Supplier" or "Both") &&
+            string.Equals(x.BusinessName, SupplierNameInput.Trim(), StringComparison.OrdinalIgnoreCase));
+
         var model = new Purchase
         {
             Id = SelectedPurchase?.Id ?? 0,
             PurchaseNo = PurchaseNoInput.Trim(),
             ProjectNo = ProjectNoInput.Trim(),
+            ProjectId = project?.Id ?? 0,
             SupplierName = SupplierNameInput.Trim(),
+            SupplierId = supplier?.Id ?? 0,
             Date = DateInput,
             DueDate = DueDateInput,
             TermDays = termDays,
@@ -407,6 +441,12 @@ public sealed class PurchasesViewModel : ObservableObject
             return;
         }
 
+        var products = _dataService.GetProducts();
+        var product = products.FirstOrDefault(x =>
+            string.Equals(x.Name, ItemNameInput.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (!string.IsNullOrWhiteSpace(ItemSkuInput) &&
+             string.Equals(x.Sku, ItemSkuInput.Trim(), StringComparison.OrdinalIgnoreCase)));
+
         var amount = qty * rate;
         var vatAmount = amount * (vatRate / 100m);
         var dutyAmount = amount * (dutyRate / 100m);
@@ -416,11 +456,12 @@ public sealed class PurchasesViewModel : ObservableObject
         DraftItems.Add(
             new PurchaseItem
             {
-                Sku = string.Empty,
+                ProductId = product?.Id ?? 0,
+                Sku = string.IsNullOrWhiteSpace(ItemSkuInput) ? product?.Sku ?? string.Empty : ItemSkuInput.Trim(),
                 ProductName = ItemNameInput.Trim(),
-                Description = ItemNameInput.Trim(),
+                Description = string.IsNullOrWhiteSpace(ItemDescriptionInput) ? ItemNameInput.Trim() : ItemDescriptionInput.Trim(),
                 Qty = qty,
-                Unit = "Nos",
+                Unit = string.IsNullOrWhiteSpace(ItemUnitInput) ? "Nos" : ItemUnitInput.Trim(),
                 Rate = rate,
                 Amount = amount,
                 CustomDuty = dutyRate,
@@ -432,7 +473,10 @@ public sealed class PurchasesViewModel : ObservableObject
             });
 
         ItemNameInput = ProductNames.FirstOrDefault() ?? string.Empty;
+        ItemSkuInput = string.Empty;
+        ItemDescriptionInput = string.Empty;
         ItemQtyInput = string.Empty;
+        ItemUnitInput = "Nos";
         ItemRateInput = string.Empty;
         ItemVatRateInput = "5";
         ItemDutyRateInput = string.Empty;
@@ -497,6 +541,7 @@ public sealed class PurchasesViewModel : ObservableObject
         {
             Id = source.Id,
             ProductId = source.ProductId,
+            Sku = source.Sku,
             ProductName = source.ProductName,
             Description = source.Description,
             Qty = source.Qty,

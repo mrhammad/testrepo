@@ -211,6 +211,7 @@ public sealed class InMemoryAppDataService : IAppDataService
         existing.Sku = product.Sku;
         existing.Name = product.Name;
         existing.Category = product.Category;
+        existing.Type = product.Type;
         existing.StockAccount = product.StockAccount;
         existing.LowStockLevel = product.LowStockLevel;
         existing.SalePrice = product.SalePrice;
@@ -406,6 +407,7 @@ public sealed class InMemoryAppDataService : IAppDataService
             Sku = item.Sku,
             Name = item.Name,
             Category = item.Category,
+            Type = item.Type,
             StockAccount = item.StockAccount,
             LowStockLevel = item.LowStockLevel,
             SalePrice = item.SalePrice,
@@ -437,6 +439,7 @@ public sealed class InMemoryAppDataService : IAppDataService
             PoNumber = item.PoNumber,
             TotalAmount = item.TotalAmount,
             Balance = item.Balance,
+            CreatedBy = item.CreatedBy,
             Items = item.Items.Select(ClonePurchaseItem).ToList()
         };
     }
@@ -489,6 +492,7 @@ public sealed class InMemoryAppDataService : IAppDataService
         return new SaleItem
         {
             Id = item.Id,
+            SaleId = item.SaleId,
             ProductId = item.ProductId,
             Sku = item.Sku,
             ProductName = item.ProductName,
