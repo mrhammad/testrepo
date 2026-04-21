@@ -151,9 +151,12 @@ public sealed class JsonFileAppDataService : IAppDataService
         existing.Province = contact.Province;
         existing.PostalCode = contact.PostalCode;
         existing.Country = contact.Country;
+        existing.BatakaNumber = contact.BatakaNumber;
+        existing.BusinessLicenseNumber = contact.BusinessLicenseNumber;
         existing.VatNumber = contact.VatNumber;
         existing.PaymentTermDays = contact.PaymentTermDays;
         existing.CreditLimit = contact.CreditLimit;
+        existing.OpeningBalance = contact.OpeningBalance;
         existing.Notes = contact.Notes;
         Save();
         return true;
@@ -560,9 +563,12 @@ public sealed class JsonFileAppDataService : IAppDataService
             Province = item.Province,
             PostalCode = item.PostalCode,
             Country = item.Country,
+            BatakaNumber = item.BatakaNumber,
+            BusinessLicenseNumber = item.BusinessLicenseNumber,
             VatNumber = item.VatNumber,
             PaymentTermDays = item.PaymentTermDays,
             CreditLimit = item.CreditLimit,
+            OpeningBalance = item.OpeningBalance,
             Notes = item.Notes
         };
     }

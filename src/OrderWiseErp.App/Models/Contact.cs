@@ -40,6 +40,10 @@ public sealed class Contact
 
     public string Country { get; set; } = string.Empty;
 
+    public string BatakaNumber { get; set; } = string.Empty;
+
+    public string BusinessLicenseNumber { get; set; } = string.Empty;
+
     public string VatNumber { get; set; } = string.Empty;
 
     public int PaymentTermDays { get; set; }
