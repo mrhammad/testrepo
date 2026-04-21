@@ -4,6 +4,8 @@ public sealed class SaleItem
 {
     public int Id { get; set; }
 
+    public int SaleId { get; set; }
+
     public int ProductId { get; set; }
 
     public string Sku { get; set; } = string.Empty;
