@@ -17,6 +17,15 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="#2563EB" />
+        <Setter Property="BorderBrush" Value="#1D4ED8" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
     <Style x:Key="CardBorderStyle" TargetType="Border">
         <Setter Property="Background" Value="White" />
         <Setter Property="BorderBrush" Value="#E5E7EB" />
