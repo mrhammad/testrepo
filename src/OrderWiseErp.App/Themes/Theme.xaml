@@ -4,6 +4,23 @@
     <SolidColorBrush x:Key="PageBackgroundBrush" Color="#F8FAFC" />
     <SolidColorBrush x:Key="MutedTextBrush" Color="#6B7280" />
     <SolidColorBrush x:Key="DividerBrush" Color="#E5E7EB" />
+    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="#F9FAFB" />
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="#D1D5DB" />
+    <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="#F3F4F6" />
+    <SolidColorBrush x:Key="ButtonHoverBorderBrush" Color="#9CA3AF" />
+    <SolidColorBrush x:Key="ButtonPressedBackgroundBrush" Color="#E5E7EB" />
+    <SolidColorBrush x:Key="ButtonPressedBorderBrush" Color="#6B7280" />
+    <SolidColorBrush x:Key="PrimaryButtonBackgroundBrush" Color="#2563EB" />
+    <SolidColorBrush x:Key="PrimaryButtonBorderBrush" Color="#1D4ED8" />
+    <SolidColorBrush x:Key="PrimaryButtonHoverBackgroundBrush" Color="#1D4ED8" />
+    <SolidColorBrush x:Key="PrimaryButtonHoverBorderBrush" Color="#1E40AF" />
+    <SolidColorBrush x:Key="PrimaryButtonPressedBackgroundBrush" Color="#1E40AF" />
+    <SolidColorBrush x:Key="PrimaryButtonPressedBorderBrush" Color="#1E3A8A" />
+    <SolidColorBrush x:Key="DataGridHeaderBackgroundBrush" Color="#F3F4F6" />
+    <SolidColorBrush x:Key="DataGridHeaderForegroundBrush" Color="#374151" />
+    <SolidColorBrush x:Key="DataGridRowHoverBrush" Color="#EEF2FF" />
+    <SolidColorBrush x:Key="DataGridRowSelectedBrush" Color="#DBEAFE" />
+    <SolidColorBrush x:Key="DataGridAltRowBrush" Color="#FAFAFC" />
 
     <Style x:Key="AppTitleTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="22" />
@@ -17,13 +34,140 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
-    <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="#2563EB" />
-        <Setter Property="BorderBrush" Value="#1D4ED8" />
+    <Style x:Key="AppButtonBaseStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="#111827" />
+        <Setter Property="Background" Value="{StaticResource ButtonBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="12,6" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="ButtonBorder"
+                            CornerRadius="6"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Margin="{TemplateBinding Padding}"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource ButtonHoverBackgroundBrush}" />
+                            <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource ButtonHoverBorderBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource ButtonPressedBackgroundBrush}" />
+                            <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource ButtonPressedBorderBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.55" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" BasedOn="{StaticResource AppButtonBaseStyle}" />
+
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource AppButtonBaseStyle}">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{StaticResource PrimaryButtonBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryButtonBorderBrush}" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource PrimaryButtonHoverBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource PrimaryButtonHoverBorderBrush}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource PrimaryButtonPressedBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource PrimaryButtonPressedBorderBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="DataGrid">
+        <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background" Value="White" />
+        <Setter Property="Foreground" Value="#111827" />
+        <Setter Property="AutoGenerateColumns" Value="False" />
+        <Setter Property="CanUserResizeRows" Value="False" />
+        <Setter Property="CanUserAddRows" Value="False" />
+        <Setter Property="CanUserDeleteRows" Value="False" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource DividerBrush}" />
+        <Setter Property="VerticalGridLinesBrush" Value="#F3F4F6" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="RowHeaderWidth" Value="0" />
+        <Setter Property="AlternationCount" Value="2" />
+        <Setter Property="SelectionUnit" Value="FullRow" />
+        <Setter Property="SelectionMode" Value="Single" />
+        <Setter Property="ColumnHeaderStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="{StaticResource DataGridHeaderBackgroundBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource DataGridHeaderForegroundBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}" />
+                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                    <Setter Property="Padding" Value="10,8" />
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="CellStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Padding" Value="8,4" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Foreground" Value="#111827" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="RowStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="White" />
+                    <Setter Property="Foreground" Value="#111827" />
+                    <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}" />
+                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    <Setter Property="MinHeight" Value="32" />
+                    <Style.Triggers>
+                        <Trigger Property="AlternationIndex" Value="1">
+                            <Setter Property="Background" Value="{StaticResource DataGridAltRowBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource DataGridRowHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{StaticResource DataGridRowSelectedBrush}" />
+                            <Setter Property="Foreground" Value="#111827" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="CardBorderStyle" TargetType="Border">
