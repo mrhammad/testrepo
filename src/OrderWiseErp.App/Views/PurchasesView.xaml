@@ -100,32 +100,76 @@
 
                 <GroupBox Grid.Row="4" Header="{l10n:L10n Purchases.LineItem}" Margin="0,0,0,10">
                     <Grid Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="70" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="1.1*" />
+                            <ColumnDefinition Width="2.3*" />
+                            <ColumnDefinition Width="2.3*" />
+                            <ColumnDefinition Width="0.8*" />
+                            <ColumnDefinition Width="0.9*" />
+                            <ColumnDefinition Width="0.9*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Margin="0,0,8,0" Text="{Binding ItemSkuInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <ComboBox Grid.Column="1"
+
+                        <TextBlock Text="{l10n:L10n Products.Sku}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="1" Text="{l10n:L10n Common.Product}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="2" Text="{l10n:L10n Common.Description}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="3" Text="{l10n:L10n Common.Unit}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="4" Text="{l10n:L10n Common.Qty}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="5" Text="{l10n:L10n Common.Rate}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="6" Text="{l10n:L10n Purchases.DutyPercent}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="7" Text="{l10n:L10n Common.VatPercent}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="8" Text="{l10n:L10n Common.TaxPercent}" Margin="0,0,8,4" />
+
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="0"
+                                 Margin="0,0,8,0"
+                                 Text="{Binding ItemSkuInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <ComboBox Grid.Row="1"
+                                  Grid.Column="1"
                                   Margin="0,0,8,0"
                                   ItemsSource="{Binding ProductNames}"
                                   IsEditable="True"
                                   Text="{Binding ItemNameInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="2" Margin="0,0,8,0" Text="{Binding ItemDescriptionInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="3" Margin="0,0,8,0" Text="{Binding ItemUnitInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="4" Margin="0,0,8,0" Text="{Binding ItemQtyInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="5" Margin="0,0,8,0" Text="{Binding ItemRateInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="6" Margin="0,0,8,0" Text="{Binding ItemDutyRateInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="7" Margin="0,0,8,0" Text="{Binding ItemVatRateInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="8" Margin="0,0,8,0" Text="{Binding ItemIncomeTaxRateInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Grid.Column="9" Content="{l10n:L10n Common.Add}" Command="{Binding AddItemCommand}" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="2"
+                                 Margin="0,0,8,0"
+                                 Text="{Binding ItemDescriptionInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="3"
+                                 Margin="0,0,8,0"
+                                 Text="{Binding ItemUnitInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="4"
+                                 Margin="0,0,8,0"
+                                 Text="{Binding ItemQtyInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="5"
+                                 Margin="0,0,8,0"
+                                 Text="{Binding ItemRateInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="6"
+                                 Margin="0,0,8,0"
+                                 Text="{Binding ItemDutyRateInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="7"
+                                 Margin="0,0,8,0"
+                                 Text="{Binding ItemVatRateInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="8"
+                                 Margin="0,0,8,0"
+                                 Text="{Binding ItemIncomeTaxRateInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Row="1"
+                                Grid.Column="9"
+                                MinWidth="88"
+                                Content="{l10n:L10n Common.Add}"
+                                Command="{Binding AddItemCommand}" />
                     </Grid>
                 </GroupBox>
 
