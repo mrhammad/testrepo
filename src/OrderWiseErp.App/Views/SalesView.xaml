@@ -183,18 +183,18 @@
                           CanUserAddRows="False"
                           IsReadOnly="True">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="{l10n:L10n Products.Sku}" Binding="{Binding Sku}" Width="120" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.Name}" Binding="{Binding ProductName}" Width="*" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.Description}" Binding="{Binding Description}" Width="150" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.Qty}" Binding="{Binding Qty, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.Unit}" Binding="{Binding Unit}" Width="70" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.Rate}" Binding="{Binding Rate, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.Amount}" Binding="{Binding Amount, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.DiscountPercent}" Binding="{Binding DiscountPercent, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.Discount}" Binding="{Binding DiscountAmount, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.VatPercent}" Binding="{Binding VatRate, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.Vat}" Binding="{Binding VatAmount, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="{l10n:L10n Common.Net}" Binding="{Binding NetAmount, StringFormat=N2}" Width="110" />
+                        <DataGridTextColumn Header="{l10n:L10n Products.Sku}" Binding="{Binding Sku}" Width="90" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Name}" Binding="{Binding ProductName}" Width="1.6*" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Description}" Binding="{Binding Description}" Width="1.8*" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Qty}" Binding="{Binding Qty, StringFormat=N2}" Width="72" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Unit}" Binding="{Binding Unit}" Width="64" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Rate}" Binding="{Binding Rate, StringFormat=N2}" Width="82" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Amount}" Binding="{Binding Amount, StringFormat=N2}" Width="86" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.DiscountPercent}" Binding="{Binding DiscountPercent, StringFormat=N2}" Width="76" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Discount}" Binding="{Binding DiscountAmount, StringFormat=N2}" Width="82" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.VatPercent}" Binding="{Binding VatRate, StringFormat=N2}" Width="76" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Vat}" Binding="{Binding VatAmount, StringFormat=N2}" Width="82" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Net}" Binding="{Binding NetAmount, StringFormat=N2}" Width="92" />
                     </DataGrid.Columns>
                 </DataGrid>
 
