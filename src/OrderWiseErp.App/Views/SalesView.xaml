@@ -195,22 +195,22 @@
                         <TextBlock>
                             <Run Text="{l10n:L10n Sales.Subtotal}" />
                             <Run Text=": " />
-                            <Run Text="{Binding Subtotal, StringFormat=N2}" />
+                            <Run Text="{Binding Subtotal, Mode=OneWay, StringFormat=N2}" />
                         </TextBlock>
                         <TextBlock>
                             <Run Text="{l10n:L10n Common.Discount}" />
                             <Run Text=": " />
-                            <Run Text="{Binding DiscountTotal, StringFormat=N2}" />
+                            <Run Text="{Binding DiscountTotal, Mode=OneWay, StringFormat=N2}" />
                         </TextBlock>
                         <TextBlock>
                             <Run Text="{l10n:L10n Common.Vat}" />
                             <Run Text=": " />
-                            <Run Text="{Binding VatTotal, StringFormat=N2}" />
+                            <Run Text="{Binding VatTotal, Mode=OneWay, StringFormat=N2}" />
                         </TextBlock>
                         <TextBlock FontWeight="SemiBold">
                             <Run Text="{l10n:L10n Sales.NetTotal}" />
                             <Run Text=": " />
-                            <Run Text="{Binding TotalAmount, StringFormat=N2}" />
+                            <Run Text="{Binding TotalAmount, Mode=OneWay, StringFormat=N2}" />
                         </TextBlock>
                         <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
                     </StackPanel>
