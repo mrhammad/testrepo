@@ -16,6 +16,8 @@ public sealed class InMemoryAppDataService : IAppDataService
     private readonly List<Product> _products;
     private readonly List<Purchase> _purchases;
     private readonly List<Sale> _sales;
+    private readonly List<StockAdjustment> _stockAdjustments;
+    private readonly List<StockTransfer> _stockTransfers;
     private readonly string _dataFilePath;
 
     private int _nextProjectId = 1;
@@ -25,6 +27,10 @@ public sealed class InMemoryAppDataService : IAppDataService
     private int _nextPurchaseItemId = 1;
     private int _nextSaleId = 1;
     private int _nextSaleItemId = 1;
+    private int _nextStockAdjustmentId = 1;
+    private int _nextStockAdjustmentItemId = 1;
+    private int _nextStockTransferId = 1;
+    private int _nextStockTransferItemId = 1;
 
     public InMemoryAppDataService()
     {
@@ -37,7 +43,7 @@ public sealed class InMemoryAppDataService : IAppDataService
         var existingData = LoadStore();
         if (existingData is null)
         {
-            (_projects, _contacts, _products, _purchases, _sales) = BuildSeedData();
+            (_projects, _contacts, _products, _purchases, _sales, _stockAdjustments, _stockTransfers) = BuildSeedData();
             SaveStore();
         }
         else
@@ -47,6 +53,8 @@ public sealed class InMemoryAppDataService : IAppDataService
             _products = existingData.Products ?? [];
             _purchases = existingData.Purchases ?? [];
             _sales = existingData.Sales ?? [];
+            _stockAdjustments = existingData.StockAdjustments ?? [];
+            _stockTransfers = existingData.StockTransfers ?? [];
             EnsureItemIds();
         }
 
@@ -62,6 +70,10 @@ public sealed class InMemoryAppDataService : IAppDataService
     public IReadOnlyList<Purchase> Purchases => _purchases;
 
     public IReadOnlyList<Sale> Sales => _sales;
+
+    public IReadOnlyList<StockAdjustment> StockAdjustments => _stockAdjustments;
+
+    public IReadOnlyList<StockTransfer> StockTransfers => _stockTransfers;
 
     public IReadOnlyList<Project> GetProjects()
     {
@@ -355,6 +367,116 @@ public sealed class InMemoryAppDataService : IAppDataService
         return removed;
     }
 
+    public IReadOnlyList<StockAdjustment> GetStockAdjustments()
+    {
+        return _stockAdjustments
+            .OrderByDescending(x => x.Date)
+            .ThenByDescending(x => x.Id)
+            .Select(CloneStockAdjustment)
+            .ToList();
+    }
+
+    public StockAdjustment AddStockAdjustment(StockAdjustment adjustment)
+    {
+        var copy = CloneStockAdjustment(adjustment);
+        copy.Id = _nextStockAdjustmentId++;
+        AssignStockAdjustmentItemIds(copy);
+        RecalculateStockAdjustment(copy);
+        _stockAdjustments.Add(copy);
+        SaveStore();
+        return CloneStockAdjustment(copy);
+    }
+
+    public bool UpdateStockAdjustment(StockAdjustment adjustment)
+    {
+        var existing = _stockAdjustments.FirstOrDefault(x => x.Id == adjustment.Id);
+        if (existing is null)
+        {
+            return false;
+        }
+
+        var copy = CloneStockAdjustment(adjustment);
+        copy.Id = existing.Id;
+        AssignStockAdjustmentItemIds(copy);
+        RecalculateStockAdjustment(copy);
+        var index = _stockAdjustments.IndexOf(existing);
+        _stockAdjustments[index] = copy;
+        SaveStore();
+        return true;
+    }
+
+    public bool DeleteStockAdjustment(int adjustmentId)
+    {
+        var existing = _stockAdjustments.FirstOrDefault(x => x.Id == adjustmentId);
+        if (existing is null)
+        {
+            return false;
+        }
+
+        var removed = _stockAdjustments.Remove(existing);
+        if (removed)
+        {
+            SaveStore();
+        }
+
+        return removed;
+    }
+
+    public IReadOnlyList<StockTransfer> GetStockTransfers()
+    {
+        return _stockTransfers
+            .OrderByDescending(x => x.Date)
+            .ThenByDescending(x => x.Id)
+            .Select(CloneStockTransfer)
+            .ToList();
+    }
+
+    public StockTransfer AddStockTransfer(StockTransfer transfer)
+    {
+        var copy = CloneStockTransfer(transfer);
+        copy.Id = _nextStockTransferId++;
+        AssignStockTransferItemIds(copy);
+        RecalculateStockTransfer(copy);
+        _stockTransfers.Add(copy);
+        SaveStore();
+        return CloneStockTransfer(copy);
+    }
+
+    public bool UpdateStockTransfer(StockTransfer transfer)
+    {
+        var existing = _stockTransfers.FirstOrDefault(x => x.Id == transfer.Id);
+        if (existing is null)
+        {
+            return false;
+        }
+
+        var copy = CloneStockTransfer(transfer);
+        copy.Id = existing.Id;
+        AssignStockTransferItemIds(copy);
+        RecalculateStockTransfer(copy);
+        var index = _stockTransfers.IndexOf(existing);
+        _stockTransfers[index] = copy;
+        SaveStore();
+        return true;
+    }
+
+    public bool DeleteStockTransfer(int transferId)
+    {
+        var existing = _stockTransfers.FirstOrDefault(x => x.Id == transferId);
+        if (existing is null)
+        {
+            return false;
+        }
+
+        var removed = _stockTransfers.Remove(existing);
+        if (removed)
+        {
+            SaveStore();
+        }
+
+        return removed;
+    }
+
     private static Project CloneProject(Project item)
     {
         return new Project
@@ -509,6 +631,72 @@ public sealed class InMemoryAppDataService : IAppDataService
         };
     }
 
+    private static StockAdjustment CloneStockAdjustment(StockAdjustment item)
+    {
+        return new StockAdjustment
+        {
+            Id = item.Id,
+            Date = item.Date,
+            ReferenceNo = item.ReferenceNo,
+            CustomerOrSupplier = item.CustomerOrSupplier,
+            Location = item.Location,
+            AdjustmentType = item.AdjustmentType,
+            TotalAmount = item.TotalAmount,
+            TotalAmountRecovered = item.TotalAmountRecovered,
+            Reason = item.Reason,
+            AddedBy = item.AddedBy,
+            Items = item.Items.Select(CloneStockAdjustmentItem).ToList()
+        };
+    }
+
+    private static StockAdjustmentItem CloneStockAdjustmentItem(StockAdjustmentItem item)
+    {
+        return new StockAdjustmentItem
+        {
+            Id = item.Id,
+            StockAdjustmentId = item.StockAdjustmentId,
+            ProductId = item.ProductId,
+            Sku = item.Sku,
+            ProductName = item.ProductName,
+            Qty = item.Qty,
+            UnitPrice = item.UnitPrice,
+            SubTotal = item.SubTotal
+        };
+    }
+
+    private static StockTransfer CloneStockTransfer(StockTransfer item)
+    {
+        return new StockTransfer
+        {
+            Id = item.Id,
+            Date = item.Date,
+            ReferenceNo = item.ReferenceNo,
+            LocationFrom = item.LocationFrom,
+            LocationTo = item.LocationTo,
+            Status = item.Status,
+            CustomerOrSupplier = item.CustomerOrSupplier,
+            ShippingCharges = item.ShippingCharges,
+            TotalAmount = item.TotalAmount,
+            AdditionalNote = item.AdditionalNote,
+            Items = item.Items.Select(CloneStockTransferItem).ToList()
+        };
+    }
+
+    private static StockTransferItem CloneStockTransferItem(StockTransferItem item)
+    {
+        return new StockTransferItem
+        {
+            Id = item.Id,
+            StockTransferId = item.StockTransferId,
+            ProductId = item.ProductId,
+            Sku = item.Sku,
+            ProductName = item.ProductName,
+            Qty = item.Qty,
+            UnitPrice = item.UnitPrice,
+            SubTotal = item.SubTotal
+        };
+    }
+
     private void SaveStore()
     {
         var store = new AppDataStore
@@ -517,7 +705,9 @@ public sealed class InMemoryAppDataService : IAppDataService
             Contacts = _contacts,
             Products = _products,
             Purchases = _purchases,
-            Sales = _sales
+            Sales = _sales,
+            StockAdjustments = _stockAdjustments,
+            StockTransfers = _stockTransfers
         };
 
         var json = JsonSerializer.Serialize(store, JsonOptions);
@@ -542,7 +732,7 @@ public sealed class InMemoryAppDataService : IAppDataService
         }
     }
 
-    private (List<Project>, List<Contact>, List<Product>, List<Purchase>, List<Sale>) BuildSeedData()
+    private (List<Project>, List<Contact>, List<Product>, List<Purchase>, List<Sale>, List<StockAdjustment>, List<StockTransfer>) BuildSeedData()
     {
         var projects = new List<Project>
         {
@@ -681,7 +871,65 @@ public sealed class InMemoryAppDataService : IAppDataService
             RecalculateSale(seedSale);
             sales.Add(seedSale);
         }
-        return (projects, contacts, products, purchases, sales);
+        var stockAdjustments = new List<StockAdjustment>
+        {
+            new()
+            {
+                Id = _nextStockAdjustmentId++,
+                Date = new DateTime(2026, 2, 5),
+                ReferenceNo = "SA-0001",
+                CustomerOrSupplier = "ABC Imports",
+                Location = "Main Warehouse",
+                AdjustmentType = "Increase",
+                TotalAmountRecovered = 0m,
+                Reason = "Opening stock correction",
+                AddedBy = "System",
+                Items =
+                [
+                    new StockAdjustmentItem
+                    {
+                        Id = _nextStockAdjustmentItemId++,
+                        ProductId = products[0].Id,
+                        Sku = products[0].Sku,
+                        ProductName = products[0].Name,
+                        Qty = 10m,
+                        UnitPrice = products[0].Cost
+                    }
+                ]
+            }
+        };
+        RecalculateStockAdjustment(stockAdjustments[0]);
+
+        var stockTransfers = new List<StockTransfer>
+        {
+            new()
+            {
+                Id = _nextStockTransferId++,
+                Date = new DateTime(2026, 2, 10),
+                ReferenceNo = "ST-0001",
+                LocationFrom = "Main Warehouse",
+                LocationTo = "Gov Dispatch Hub",
+                Status = "Completed",
+                CustomerOrSupplier = "Govt Procurement Wing",
+                ShippingCharges = 200m,
+                AdditionalNote = "Initial deployment",
+                Items =
+                [
+                    new StockTransferItem
+                    {
+                        Id = _nextStockTransferItemId++,
+                        ProductId = products[0].Id,
+                        Sku = products[0].Sku,
+                        ProductName = products[0].Name,
+                        Qty = 25m,
+                        UnitPrice = products[0].Cost
+                    }
+                ]
+            }
+        };
+        RecalculateStockTransfer(stockTransfers[0]);
+
+        return (projects, contacts, products, purchases, sales, stockAdjustments, stockTransfers);
     }
 
     private void RefreshNextIds()
@@ -693,6 +941,10 @@ public sealed class InMemoryAppDataService : IAppDataService
         _nextPurchaseItemId = _purchases.SelectMany(x => x.Items).DefaultIfEmpty(new PurchaseItem { Id = 0 }).Max(x => x.Id) + 1;
         _nextSaleId = _sales.Count == 0 ? 1 : _sales.Max(x => x.Id) + 1;
         _nextSaleItemId = _sales.SelectMany(x => x.Items).DefaultIfEmpty(new SaleItem { Id = 0 }).Max(x => x.Id) + 1;
+        _nextStockAdjustmentId = _stockAdjustments.Count == 0 ? 1 : _stockAdjustments.Max(x => x.Id) + 1;
+        _nextStockAdjustmentItemId = _stockAdjustments.SelectMany(x => x.Items).DefaultIfEmpty(new StockAdjustmentItem { Id = 0 }).Max(x => x.Id) + 1;
+        _nextStockTransferId = _stockTransfers.Count == 0 ? 1 : _stockTransfers.Max(x => x.Id) + 1;
+        _nextStockTransferItemId = _stockTransfers.SelectMany(x => x.Items).DefaultIfEmpty(new StockTransferItem { Id = 0 }).Max(x => x.Id) + 1;
     }
 
     private void EnsureItemIds()
@@ -722,6 +974,32 @@ public sealed class InMemoryAppDataService : IAppDataService
 
             RecalculateSale(sale);
         }
+
+        foreach (var adjustment in _stockAdjustments)
+        {
+            foreach (var item in adjustment.Items)
+            {
+                if (item.Id <= 0)
+                {
+                    item.Id = _nextStockAdjustmentItemId++;
+                }
+            }
+
+            RecalculateStockAdjustment(adjustment);
+        }
+
+        foreach (var transfer in _stockTransfers)
+        {
+            foreach (var item in transfer.Items)
+            {
+                if (item.Id <= 0)
+                {
+                    item.Id = _nextStockTransferItemId++;
+                }
+            }
+
+            RecalculateStockTransfer(transfer);
+        }
     }
 
     private void AssignPurchaseItemIds(Purchase purchase)
@@ -742,6 +1020,28 @@ public sealed class InMemoryAppDataService : IAppDataService
             if (item.Id <= 0)
             {
                 item.Id = _nextSaleItemId++;
+            }
+        }
+    }
+
+    private void AssignStockAdjustmentItemIds(StockAdjustment adjustment)
+    {
+        foreach (var item in adjustment.Items)
+        {
+            if (item.Id <= 0)
+            {
+                item.Id = _nextStockAdjustmentItemId++;
+            }
+        }
+    }
+
+    private void AssignStockTransferItemIds(StockTransfer transfer)
+    {
+        foreach (var item in transfer.Items)
+        {
+            if (item.Id <= 0)
+            {
+                item.Id = _nextStockTransferItemId++;
             }
         }
     }
@@ -773,5 +1073,25 @@ public sealed class InMemoryAppDataService : IAppDataService
 
         sale.TotalAmount = sale.Items.Sum(x => x.NetAmount);
         sale.Balance = sale.TotalAmount;
+    }
+
+    private static void RecalculateStockAdjustment(StockAdjustment adjustment)
+    {
+        foreach (var item in adjustment.Items)
+        {
+            item.SubTotal = item.Qty * item.UnitPrice;
+        }
+
+        adjustment.TotalAmount = adjustment.Items.Sum(x => x.SubTotal);
+    }
+
+    private static void RecalculateStockTransfer(StockTransfer transfer)
+    {
+        foreach (var item in transfer.Items)
+        {
+            item.SubTotal = item.Qty * item.UnitPrice;
+        }
+
+        transfer.TotalAmount = transfer.Items.Sum(x => x.SubTotal) + transfer.ShippingCharges;
     }
 }

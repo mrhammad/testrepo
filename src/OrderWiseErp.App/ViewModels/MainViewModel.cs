@@ -14,6 +14,7 @@ public sealed class MainViewModel : ObservableObject
     private readonly ProductsViewModel _productsViewModel;
     private readonly PurchasesViewModel _purchasesViewModel;
     private readonly SalesViewModel _salesViewModel;
+    private readonly StockViewModel _stockViewModel;
     private readonly SettingsViewModel _settingsViewModel;
     private NavigationItem? _selectedModule;
     private object? _currentViewModel;
@@ -21,7 +22,6 @@ public sealed class MainViewModel : ObservableObject
     private string _pageSubtitle = string.Empty;
     private readonly PlaceholderModuleViewModel _paymentsPlaceholder;
     private readonly PlaceholderModuleViewModel _expensesPlaceholder;
-    private readonly PlaceholderModuleViewModel _stockPlaceholder;
     private readonly PlaceholderModuleViewModel _reportsPlaceholder;
 
     public MainViewModel(IAppDataService dataService, LocalizationService localization)
@@ -32,11 +32,11 @@ public sealed class MainViewModel : ObservableObject
         _productsViewModel = new ProductsViewModel(dataService);
         _purchasesViewModel = new PurchasesViewModel(dataService);
         _salesViewModel = new SalesViewModel(dataService);
+        _stockViewModel = new StockViewModel(dataService);
         _dashboardViewModel = new DashboardViewModel(dataService);
         _settingsViewModel = new SettingsViewModel(localization);
         _paymentsPlaceholder = new PlaceholderModuleViewModel(localization, "nav.payments", "placeholder.next-iteration");
         _expensesPlaceholder = new PlaceholderModuleViewModel(localization, "nav.expenses", "placeholder.next-iteration");
-        _stockPlaceholder = new PlaceholderModuleViewModel(localization, "nav.stock", "placeholder.next-iteration");
         _reportsPlaceholder = new PlaceholderModuleViewModel(localization, "nav.reports", "placeholder.next-iteration");
 
         Modules = new ObservableCollection<NavigationItem>
@@ -49,7 +49,7 @@ public sealed class MainViewModel : ObservableObject
             new NavigationItem(localization, "nav.sales", "nav.sales.subtitle", _salesViewModel),
             new NavigationItem(localization, "nav.payments", "nav.payments.subtitle", _paymentsPlaceholder),
             new NavigationItem(localization, "nav.expenses", "nav.expenses.subtitle", _expensesPlaceholder),
-            new NavigationItem(localization, "nav.stock", "nav.stock.subtitle", _stockPlaceholder),
+            new NavigationItem(localization, "nav.stock", "nav.stock.subtitle", _stockViewModel),
             new NavigationItem(localization, "nav.reports", "nav.reports.subtitle", _reportsPlaceholder),
             new NavigationItem(localization, "nav.settings", "nav.settings.subtitle", _settingsViewModel)
         };
@@ -59,6 +59,7 @@ public sealed class MainViewModel : ObservableObject
         _productsViewModel.DataChanged += OnDataChanged;
         _purchasesViewModel.DataChanged += OnDataChanged;
         _salesViewModel.DataChanged += OnDataChanged;
+        _stockViewModel.DataChanged += OnDataChanged;
         _localization.PropertyChanged += HandleLocalizationPropertyChanged;
 
         _dashboardViewModel.Refresh();
@@ -114,7 +115,6 @@ public sealed class MainViewModel : ObservableObject
         _dashboardViewModel.Refresh();
         _paymentsPlaceholder.LastUpdated = DateTime.Now;
         _expensesPlaceholder.LastUpdated = DateTime.Now;
-        _stockPlaceholder.LastUpdated = DateTime.Now;
         _reportsPlaceholder.LastUpdated = DateTime.Now;
     }
 
@@ -132,7 +132,6 @@ public sealed class MainViewModel : ObservableObject
 
         _paymentsPlaceholder.RefreshText();
         _expensesPlaceholder.RefreshText();
-        _stockPlaceholder.RefreshText();
         _reportsPlaceholder.RefreshText();
 
         if (SelectedModule is not null)

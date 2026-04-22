@@ -17,6 +17,10 @@ public sealed class JsonFileAppDataService : IAppDataService
     private int _nextPurchaseItemId;
     private int _nextSaleId;
     private int _nextSaleItemId;
+    private int _nextStockAdjustmentId;
+    private int _nextStockAdjustmentItemId;
+    private int _nextStockTransferId;
+    private int _nextStockTransferItemId;
 
     public JsonFileAppDataService(string storagePath)
     {
@@ -45,6 +49,10 @@ public sealed class JsonFileAppDataService : IAppDataService
 
     public IReadOnlyList<Sale> Sales => _store.Sales;
 
+    public IReadOnlyList<StockAdjustment> StockAdjustments => _store.StockAdjustments;
+
+    public IReadOnlyList<StockTransfer> StockTransfers => _store.StockTransfers;
+
     public IReadOnlyList<Project> GetProjects()
     {
         return _store.Projects.OrderBy(x => x.ProjectNo).Select(CloneProject).ToList();
@@ -68,6 +76,24 @@ public sealed class JsonFileAppDataService : IAppDataService
     public IReadOnlyList<Sale> GetSales()
     {
         return _store.Sales.OrderByDescending(x => x.Date).ThenByDescending(x => x.Id).Select(CloneSale).ToList();
+    }
+
+    public IReadOnlyList<StockAdjustment> GetStockAdjustments()
+    {
+        return _store.StockAdjustments
+            .OrderByDescending(x => x.Date)
+            .ThenByDescending(x => x.Id)
+            .Select(CloneStockAdjustment)
+            .ToList();
+    }
+
+    public IReadOnlyList<StockTransfer> GetStockTransfers()
+    {
+        return _store.StockTransfers
+            .OrderByDescending(x => x.Date)
+            .ThenByDescending(x => x.Id)
+            .Select(CloneStockTransfer)
+            .ToList();
     }
 
     public Project AddProject(Project project)
@@ -383,6 +409,140 @@ public sealed class JsonFileAppDataService : IAppDataService
         return removed;
     }
 
+    public StockAdjustment AddStockAdjustment(StockAdjustment adjustment)
+    {
+        var copy = CloneStockAdjustment(adjustment);
+        copy.Id = _nextStockAdjustmentId++;
+        copy.Items = copy.Items.Select(CloneStockAdjustmentItem).ToList();
+        foreach (var item in copy.Items)
+        {
+            item.Id = _nextStockAdjustmentItemId++;
+            item.StockAdjustmentId = copy.Id;
+        }
+
+        RecalculateStockAdjustment(copy);
+        _store.StockAdjustments.Add(copy);
+        Save();
+        return CloneStockAdjustment(copy);
+    }
+
+    public bool UpdateStockAdjustment(StockAdjustment adjustment)
+    {
+        var existing = _store.StockAdjustments.FirstOrDefault(x => x.Id == adjustment.Id);
+        if (existing is null)
+        {
+            return false;
+        }
+
+        existing.ReferenceNo = adjustment.ReferenceNo;
+        existing.Date = adjustment.Date;
+        existing.Location = adjustment.Location;
+        existing.AdjustmentType = adjustment.AdjustmentType;
+        existing.CustomerOrSupplier = adjustment.CustomerOrSupplier;
+        existing.TotalAmountRecovered = adjustment.TotalAmountRecovered;
+        existing.Reason = adjustment.Reason;
+        existing.AddedBy = adjustment.AddedBy;
+        existing.Items = adjustment.Items.Select(CloneStockAdjustmentItem).ToList();
+
+        foreach (var item in existing.Items)
+        {
+            if (item.Id <= 0)
+            {
+                item.Id = _nextStockAdjustmentItemId++;
+            }
+
+            item.StockAdjustmentId = existing.Id;
+        }
+
+        RecalculateStockAdjustment(existing);
+        Save();
+        return true;
+    }
+
+    public bool DeleteStockAdjustment(int stockAdjustmentId)
+    {
+        var existing = _store.StockAdjustments.FirstOrDefault(x => x.Id == stockAdjustmentId);
+        if (existing is null)
+        {
+            return false;
+        }
+
+        var removed = _store.StockAdjustments.Remove(existing);
+        if (removed)
+        {
+            Save();
+        }
+
+        return removed;
+    }
+
+    public StockTransfer AddStockTransfer(StockTransfer transfer)
+    {
+        var copy = CloneStockTransfer(transfer);
+        copy.Id = _nextStockTransferId++;
+        copy.Items = copy.Items.Select(CloneStockTransferItem).ToList();
+        foreach (var item in copy.Items)
+        {
+            item.Id = _nextStockTransferItemId++;
+            item.StockTransferId = copy.Id;
+        }
+
+        RecalculateStockTransfer(copy);
+        _store.StockTransfers.Add(copy);
+        Save();
+        return CloneStockTransfer(copy);
+    }
+
+    public bool UpdateStockTransfer(StockTransfer transfer)
+    {
+        var existing = _store.StockTransfers.FirstOrDefault(x => x.Id == transfer.Id);
+        if (existing is null)
+        {
+            return false;
+        }
+
+        existing.ReferenceNo = transfer.ReferenceNo;
+        existing.Date = transfer.Date;
+        existing.LocationFrom = transfer.LocationFrom;
+        existing.LocationTo = transfer.LocationTo;
+        existing.Status = transfer.Status;
+        existing.CustomerOrSupplier = transfer.CustomerOrSupplier;
+        existing.ShippingCharges = transfer.ShippingCharges;
+        existing.AdditionalNote = transfer.AdditionalNote;
+        existing.Items = transfer.Items.Select(CloneStockTransferItem).ToList();
+
+        foreach (var item in existing.Items)
+        {
+            if (item.Id <= 0)
+            {
+                item.Id = _nextStockTransferItemId++;
+            }
+
+            item.StockTransferId = existing.Id;
+        }
+
+        RecalculateStockTransfer(existing);
+        Save();
+        return true;
+    }
+
+    public bool DeleteStockTransfer(int stockTransferId)
+    {
+        var existing = _store.StockTransfers.FirstOrDefault(x => x.Id == stockTransferId);
+        if (existing is null)
+        {
+            return false;
+        }
+
+        var removed = _store.StockTransfers.Remove(existing);
+        if (removed)
+        {
+            Save();
+        }
+
+        return removed;
+    }
+
     private static AppDataStore LoadOrCreateStore(string storagePath)
     {
         if (!File.Exists(storagePath))
@@ -414,6 +574,10 @@ public sealed class JsonFileAppDataService : IAppDataService
         _nextPurchaseItemId = NextId(_store.Purchases.SelectMany(x => x.Items).Select(x => x.Id));
         _nextSaleId = NextId(_store.Sales.Select(x => x.Id));
         _nextSaleItemId = NextId(_store.Sales.SelectMany(x => x.Items).Select(x => x.Id));
+        _nextStockAdjustmentId = NextId(_store.StockAdjustments.Select(x => x.Id));
+        _nextStockAdjustmentItemId = NextId(_store.StockAdjustments.SelectMany(x => x.Items).Select(x => x.Id));
+        _nextStockTransferId = NextId(_store.StockTransfers.Select(x => x.Id));
+        _nextStockTransferItemId = NextId(_store.StockTransfers.SelectMany(x => x.Items).Select(x => x.Id));
     }
 
     private static int NextId(IEnumerable<int> ids)
@@ -497,6 +661,62 @@ public sealed class JsonFileAppDataService : IAppDataService
                 Cost = 10000m,
                 VatRate = 0m
             });
+
+        store.StockAdjustments.Add(
+            new StockAdjustment
+            {
+                Id = 1,
+                ReferenceNo = "ADJ-0001",
+                Date = new DateTime(2026, 2, 10),
+                Location = "Main Warehouse",
+                AdjustmentType = "Increase",
+                CustomerOrSupplier = "ABC Imports",
+                Reason = "Opening balance correction",
+                AddedBy = "System",
+                TotalAmountRecovered = 0m,
+                Items =
+                [
+                    new StockAdjustmentItem
+                    {
+                        Id = 1,
+                        StockAdjustmentId = 1,
+                        ProductId = 1,
+                        Sku = "SKU-1001",
+                        ProductName = "Medical Gloves",
+                        Qty = 25m,
+                        UnitPrice = 52m
+                    }
+                ]
+            });
+        RecalculateStockAdjustment(store.StockAdjustments[0]);
+
+        store.StockTransfers.Add(
+            new StockTransfer
+            {
+                Id = 1,
+                ReferenceNo = "TRN-0001",
+                Date = new DateTime(2026, 3, 2),
+                LocationFrom = "Main Warehouse",
+                LocationTo = "Project Site Store",
+                Status = "Pending",
+                CustomerOrSupplier = "Govt Procurement Wing",
+                ShippingCharges = 150m,
+                AdditionalNote = "Initial deployment",
+                Items =
+                [
+                    new StockTransferItem
+                    {
+                        Id = 1,
+                        StockTransferId = 1,
+                        ProductId = 1,
+                        Sku = "SKU-1001",
+                        ProductName = "Medical Gloves",
+                        Qty = 10m,
+                        UnitPrice = 52m
+                    }
+                ]
+            });
+        RecalculateStockTransfer(store.StockTransfers[0]);
     }
 
     private static void RecalculatePurchase(Purchase purchase)
@@ -534,6 +754,30 @@ public sealed class JsonFileAppDataService : IAppDataService
         {
             sale.Balance = sale.TotalAmount;
         }
+    }
+
+    private static void RecalculateStockAdjustment(StockAdjustment adjustment)
+    {
+        adjustment.Items ??= [];
+        foreach (var item in adjustment.Items)
+        {
+            item.StockAdjustmentId = adjustment.Id;
+            item.SubTotal = item.Qty * item.UnitPrice;
+        }
+
+        adjustment.TotalAmount = adjustment.Items.Sum(x => x.SubTotal);
+    }
+
+    private static void RecalculateStockTransfer(StockTransfer transfer)
+    {
+        transfer.Items ??= [];
+        foreach (var item in transfer.Items)
+        {
+            item.StockTransferId = transfer.Id;
+            item.SubTotal = item.Qty * item.UnitPrice;
+        }
+
+        transfer.TotalAmount = transfer.Items.Sum(x => x.SubTotal) + transfer.ShippingCharges;
     }
 
     private static Project CloneProject(Project item)
@@ -687,6 +931,72 @@ public sealed class JsonFileAppDataService : IAppDataService
             VatRate = item.VatRate,
             VatAmount = item.VatAmount,
             NetAmount = item.NetAmount
+        };
+    }
+
+    private static StockAdjustment CloneStockAdjustment(StockAdjustment item)
+    {
+        return new StockAdjustment
+        {
+            Id = item.Id,
+            ReferenceNo = item.ReferenceNo,
+            Date = item.Date,
+            Location = item.Location,
+            AdjustmentType = item.AdjustmentType,
+            CustomerOrSupplier = item.CustomerOrSupplier,
+            TotalAmount = item.TotalAmount,
+            TotalAmountRecovered = item.TotalAmountRecovered,
+            Reason = item.Reason,
+            AddedBy = item.AddedBy,
+            Items = item.Items.Select(CloneStockAdjustmentItem).ToList()
+        };
+    }
+
+    private static StockAdjustmentItem CloneStockAdjustmentItem(StockAdjustmentItem item)
+    {
+        return new StockAdjustmentItem
+        {
+            Id = item.Id,
+            StockAdjustmentId = item.StockAdjustmentId,
+            ProductId = item.ProductId,
+            Sku = item.Sku,
+            ProductName = item.ProductName,
+            Qty = item.Qty,
+            UnitPrice = item.UnitPrice,
+            SubTotal = item.SubTotal
+        };
+    }
+
+    private static StockTransfer CloneStockTransfer(StockTransfer item)
+    {
+        return new StockTransfer
+        {
+            Id = item.Id,
+            ReferenceNo = item.ReferenceNo,
+            Date = item.Date,
+            LocationFrom = item.LocationFrom,
+            LocationTo = item.LocationTo,
+            Status = item.Status,
+            CustomerOrSupplier = item.CustomerOrSupplier,
+            ShippingCharges = item.ShippingCharges,
+            TotalAmount = item.TotalAmount,
+            AdditionalNote = item.AdditionalNote,
+            Items = item.Items.Select(CloneStockTransferItem).ToList()
+        };
+    }
+
+    private static StockTransferItem CloneStockTransferItem(StockTransferItem item)
+    {
+        return new StockTransferItem
+        {
+            Id = item.Id,
+            StockTransferId = item.StockTransferId,
+            ProductId = item.ProductId,
+            Sku = item.Sku,
+            ProductName = item.ProductName,
+            Qty = item.Qty,
+            UnitPrice = item.UnitPrice,
+            SubTotal = item.SubTotal
         };
     }
 }

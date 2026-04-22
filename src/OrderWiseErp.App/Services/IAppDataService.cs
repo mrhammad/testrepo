@@ -14,6 +14,10 @@ public interface IAppDataService
 
     IReadOnlyList<Sale> Sales { get; }
 
+    IReadOnlyList<StockAdjustment> StockAdjustments { get; }
+
+    IReadOnlyList<StockTransfer> StockTransfers { get; }
+
     IReadOnlyList<Project> GetProjects();
     IReadOnlyList<Contact> GetContacts();
     IReadOnlyList<Product> GetProducts();
@@ -39,4 +43,14 @@ public interface IAppDataService
     Sale AddSale(Sale sale);
     bool UpdateSale(Sale sale);
     bool DeleteSale(int saleId);
+
+    IReadOnlyList<StockAdjustment> GetStockAdjustments();
+    StockAdjustment AddStockAdjustment(StockAdjustment adjustment);
+    bool UpdateStockAdjustment(StockAdjustment adjustment);
+    bool DeleteStockAdjustment(int adjustmentId);
+
+    IReadOnlyList<StockTransfer> GetStockTransfers();
+    StockTransfer AddStockTransfer(StockTransfer transfer);
+    bool UpdateStockTransfer(StockTransfer transfer);
+    bool DeleteStockTransfer(int transferId);
 }

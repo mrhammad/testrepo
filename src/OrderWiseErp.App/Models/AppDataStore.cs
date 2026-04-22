@@ -11,4 +11,8 @@ public sealed class AppDataStore
     public List<Purchase> Purchases { get; set; } = [];
 
     public List<Sale> Sales { get; set; } = [];
+
+    public List<StockAdjustment> StockAdjustments { get; set; } = [];
+
+    public List<StockTransfer> StockTransfers { get; set; } = [];
 }
