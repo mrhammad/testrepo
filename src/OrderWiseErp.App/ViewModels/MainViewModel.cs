@@ -7,42 +7,51 @@ namespace OrderWiseErp.App.ViewModels;
 
 public sealed class MainViewModel : ObservableObject
 {
+    private readonly LocalizationService _localization;
     private readonly DashboardViewModel _dashboardViewModel;
     private readonly ProjectsViewModel _projectsViewModel;
     private readonly ContactsViewModel _contactsViewModel;
     private readonly ProductsViewModel _productsViewModel;
     private readonly PurchasesViewModel _purchasesViewModel;
     private readonly SalesViewModel _salesViewModel;
+    private readonly SettingsViewModel _settingsViewModel;
     private NavigationItem? _selectedModule;
     private object? _currentViewModel;
     private string _pageTitle = string.Empty;
     private string _pageSubtitle = string.Empty;
-    private readonly PlaceholderModuleViewModel _paymentsPlaceholder = new("Payments", "Planned in next iteration");
-    private readonly PlaceholderModuleViewModel _expensesPlaceholder = new("Expenses", "Planned in next iteration");
-    private readonly PlaceholderModuleViewModel _stockPlaceholder = new("Stock", "Planned in next iteration");
-    private readonly PlaceholderModuleViewModel _reportsPlaceholder = new("Reports", "Planned in next iteration");
+    private readonly PlaceholderModuleViewModel _paymentsPlaceholder;
+    private readonly PlaceholderModuleViewModel _expensesPlaceholder;
+    private readonly PlaceholderModuleViewModel _stockPlaceholder;
+    private readonly PlaceholderModuleViewModel _reportsPlaceholder;
 
-    public MainViewModel(IAppDataService dataService)
+    public MainViewModel(IAppDataService dataService, LocalizationService localization)
     {
+        _localization = localization;
         _projectsViewModel = new ProjectsViewModel(dataService);
         _contactsViewModel = new ContactsViewModel(dataService);
         _productsViewModel = new ProductsViewModel(dataService);
         _purchasesViewModel = new PurchasesViewModel(dataService);
         _salesViewModel = new SalesViewModel(dataService);
         _dashboardViewModel = new DashboardViewModel(dataService);
+        _settingsViewModel = new SettingsViewModel(localization);
+        _paymentsPlaceholder = new PlaceholderModuleViewModel(localization, "nav.payments", "placeholder.next-iteration");
+        _expensesPlaceholder = new PlaceholderModuleViewModel(localization, "nav.expenses", "placeholder.next-iteration");
+        _stockPlaceholder = new PlaceholderModuleViewModel(localization, "nav.stock", "placeholder.next-iteration");
+        _reportsPlaceholder = new PlaceholderModuleViewModel(localization, "nav.reports", "placeholder.next-iteration");
 
         Modules = new ObservableCollection<NavigationItem>
         {
-            new NavigationItem("Dashboard", "Overview and quick metrics", _dashboardViewModel),
-            new NavigationItem("Projects", "Create and manage order-wise projects", _projectsViewModel),
-            new NavigationItem("Contacts", "Customers, suppliers, and both", _contactsViewModel),
-            new NavigationItem("Products", "Products with pricing and tax fields", _productsViewModel),
-            new NavigationItem("Purchases", "Purchase invoice entry with item lines", _purchasesViewModel),
-            new NavigationItem("Sales", "Sales invoice entry with item lines", _salesViewModel),
-            new NavigationItem("Payments", "Phase 2: Payment and allocation", _paymentsPlaceholder),
-            new NavigationItem("Expenses", "Phase 2: Expense vouchers", _expensesPlaceholder),
-            new NavigationItem("Stock", "Phase 2: Stock transfers and adjustments", _stockPlaceholder),
-            new NavigationItem("Reports", "Phase 2: Financial and tax reports", _reportsPlaceholder)
+            new NavigationItem(localization, "nav.dashboard", "nav.dashboard.subtitle", _dashboardViewModel),
+            new NavigationItem(localization, "nav.projects", "nav.projects.subtitle", _projectsViewModel),
+            new NavigationItem(localization, "nav.contacts", "nav.contacts.subtitle", _contactsViewModel),
+            new NavigationItem(localization, "nav.products", "nav.products.subtitle", _productsViewModel),
+            new NavigationItem(localization, "nav.purchases", "nav.purchases.subtitle", _purchasesViewModel),
+            new NavigationItem(localization, "nav.sales", "nav.sales.subtitle", _salesViewModel),
+            new NavigationItem(localization, "nav.payments", "nav.payments.subtitle", _paymentsPlaceholder),
+            new NavigationItem(localization, "nav.expenses", "nav.expenses.subtitle", _expensesPlaceholder),
+            new NavigationItem(localization, "nav.stock", "nav.stock.subtitle", _stockPlaceholder),
+            new NavigationItem(localization, "nav.reports", "nav.reports.subtitle", _reportsPlaceholder),
+            new NavigationItem(localization, "nav.settings", "nav.settings.subtitle", _settingsViewModel)
         };
 
         _projectsViewModel.DataChanged += OnDataChanged;
@@ -50,9 +59,12 @@ public sealed class MainViewModel : ObservableObject
         _productsViewModel.DataChanged += OnDataChanged;
         _purchasesViewModel.DataChanged += OnDataChanged;
         _salesViewModel.DataChanged += OnDataChanged;
+        _localization.PropertyChanged += HandleLocalizationPropertyChanged;
 
         _dashboardViewModel.Refresh();
         SelectedModule = Modules[0];
+        OnPropertyChanged(nameof(AppTitle));
+        OnPropertyChanged(nameof(AppSubtitle));
     }
 
     public ObservableCollection<NavigationItem> Modules { get; }
@@ -91,6 +103,12 @@ public sealed class MainViewModel : ObservableObject
         private set => SetProperty(ref _pageSubtitle, value);
     }
 
+    public LocalizationService Localization => _localization;
+
+    public string AppTitle => _localization["app.title"];
+
+    public string AppSubtitle => _localization["app.subtitle"];
+
     private void OnDataChanged()
     {
         _dashboardViewModel.Refresh();
@@ -98,5 +116,32 @@ public sealed class MainViewModel : ObservableObject
         _expensesPlaceholder.LastUpdated = DateTime.Now;
         _stockPlaceholder.LastUpdated = DateTime.Now;
         _reportsPlaceholder.LastUpdated = DateTime.Now;
+    }
+
+    private void HandleLocalizationPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName is not nameof(LocalizationService.CurrentLanguageCode))
+        {
+            return;
+        }
+
+        foreach (var module in Modules)
+        {
+            module.RefreshText();
+        }
+
+        _paymentsPlaceholder.RefreshText();
+        _expensesPlaceholder.RefreshText();
+        _stockPlaceholder.RefreshText();
+        _reportsPlaceholder.RefreshText();
+
+        if (SelectedModule is not null)
+        {
+            PageTitle = SelectedModule.Name;
+            PageSubtitle = SelectedModule.Subtitle;
+        }
+
+        OnPropertyChanged(nameof(AppTitle));
+        OnPropertyChanged(nameof(AppSubtitle));
     }
 }

@@ -15,8 +15,11 @@ public partial class App : Application
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "OrderWiseErp");
         var dataFilePath = Path.Combine(dataFolder, "phase1-data.json");
+        var settingsFilePath = Path.Combine(dataFolder, "settings.json");
         IAppDataService dataService = new JsonFileAppDataService(dataFilePath);
-        var mainViewModel = new MainViewModel(dataService);
+        var localizationService = LocalizationService.Instance;
+        localizationService.Initialize(settingsFilePath);
+        var mainViewModel = new MainViewModel(dataService, localizationService);
         var mainWindow = new MainWindow(mainViewModel);
         mainWindow.Show();
     }

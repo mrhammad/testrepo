@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l10n="clr-namespace:OrderWiseErp.App.Infrastructure"
              mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -11,19 +12,19 @@
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
 
-        <GroupBox Grid.Column="0" Header="Sales Invoices">
+        <GroupBox Grid.Column="0" Header="{l10n:L10n Sales.ListHeader}">
             <DataGrid ItemsSource="{Binding Sales}"
                       SelectedItem="{Binding SelectedSale}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       IsReadOnly="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Invoice #" Binding="{Binding InvoiceNo}" Width="120" />
-                    <DataGridTextColumn Header="Project" Binding="{Binding ProjectNo}" Width="120" />
-                    <DataGridTextColumn Header="Customer" Binding="{Binding CustomerName}" Width="*" />
-                    <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" Width="120" />
-                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=N2}" Width="110" />
-                    <DataGridTextColumn Header="Balance" Binding="{Binding Balance, StringFormat=N2}" Width="110" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.InvoiceNo}" Binding="{Binding InvoiceNo}" Width="120" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.Project}" Binding="{Binding ProjectNo}" Width="120" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.Customer}" Binding="{Binding CustomerName}" Width="*" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.Date}" Binding="{Binding Date, StringFormat=d}" Width="120" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.Total}" Binding="{Binding TotalAmount, StringFormat=N2}" Width="110" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.Balance}" Binding="{Binding Balance, StringFormat=N2}" Width="110" />
                 </DataGrid.Columns>
             </DataGrid>
         </GroupBox>
@@ -52,12 +53,12 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Invoice #" VerticalAlignment="Center" />
+                    <TextBlock Text="{l10n:L10n Common.InvoiceNo}" VerticalAlignment="Center" />
                     <TextBox Grid.Column="1"
                              Margin="8,0,14,0"
                              Text="{Binding InvoiceNo, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Column="2" Text="Date" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{l10n:L10n Common.Date}" VerticalAlignment="Center" />
                     <DatePicker Grid.Column="3"
                                 Margin="8,0,0,0"
                                 SelectedDate="{Binding SaleDate, Mode=TwoWay}" />
@@ -71,7 +72,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Project" VerticalAlignment="Center" />
+                    <TextBlock Text="{l10n:L10n Common.Project}" VerticalAlignment="Center" />
                     <ComboBox Grid.Column="1"
                               Margin="8,0,14,0"
                               ItemsSource="{Binding Projects}"
@@ -79,7 +80,7 @@
                               SelectedValuePath="Id"
                               SelectedValue="{Binding SelectedProjectId}" />
 
-                    <TextBlock Grid.Column="2" Text="Customer" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{l10n:L10n Common.Customer}" VerticalAlignment="Center" />
                     <ComboBox Grid.Column="3"
                               Margin="8,0,0,0"
                               ItemsSource="{Binding Customers}"
@@ -95,9 +96,9 @@
                         <ColumnDefinition Width="120" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Term Days" VerticalAlignment="Center" />
+                    <TextBlock Text="{l10n:L10n Common.TermDays}" VerticalAlignment="Center" />
                     <TextBox Grid.Column="1" Margin="8,0,14,0" Text="{Binding TermDaysInput, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Grid.Column="2" Text="Due Date" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{l10n:L10n Common.DueDate}" VerticalAlignment="Center" />
                     <DatePicker Grid.Column="3" Margin="8,0,0,0" SelectedDate="{Binding DueDateInput}" />
                 </Grid>
 
@@ -106,11 +107,11 @@
                         <ColumnDefinition Width="120" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="PO / SOC" VerticalAlignment="Center" />
+                    <TextBlock Text="{l10n:L10n Common.PoSoc}" VerticalAlignment="Center" />
                     <TextBox Grid.Column="1" Margin="8,0,0,0" Text="{Binding PoNumberInput, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
 
-                <GroupBox Grid.Row="4" Header="Add Line Item" Margin="0,0,0,10">
+                <GroupBox Grid.Row="4" Header="{l10n:L10n Sales.AddLineItem}" Margin="0,0,0,10">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120" />
@@ -123,7 +124,7 @@
                             <ColumnDefinition Width="150" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Product" VerticalAlignment="Center" />
+                        <TextBlock Text="{l10n:L10n Common.Name}" VerticalAlignment="Center" />
                         <ComboBox Grid.Column="1"
                                   Margin="8,0"
                                   ItemsSource="{Binding Products}"
@@ -149,7 +150,7 @@
                                  Margin="8,0"
                                  Text="{Binding ItemDescription, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Grid.Column="8"
-                                Content="Add Item"
+                                Content="{l10n:L10n Common.Add}"
                                 Margin="8,0,0,0"
                                 Command="{Binding AddItemCommand}" />
                     </Grid>
@@ -162,18 +163,18 @@
                           CanUserAddRows="False"
                           IsReadOnly="True">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="SKU" Binding="{Binding Sku}" Width="120" />
-                        <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*" />
-                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="150" />
-                        <DataGridTextColumn Header="Qty" Binding="{Binding Qty, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="70" />
-                        <DataGridTextColumn Header="Rate" Binding="{Binding Rate, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="Disc %" Binding="{Binding DiscountPercent, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="Discount" Binding="{Binding DiscountAmount, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="VAT %" Binding="{Binding VatRate, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="VAT" Binding="{Binding VatAmount, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="Net" Binding="{Binding NetAmount, StringFormat=N2}" Width="110" />
+                        <DataGridTextColumn Header="{l10n:L10n Products.Sku}" Binding="{Binding Sku}" Width="120" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Name}" Binding="{Binding ProductName}" Width="*" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Description}" Binding="{Binding Description}" Width="150" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Qty}" Binding="{Binding Qty, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Unit}" Binding="{Binding Unit}" Width="70" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Rate}" Binding="{Binding Rate, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Amount}" Binding="{Binding Amount, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.DiscountPercent}" Binding="{Binding DiscountPercent, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Discount}" Binding="{Binding DiscountAmount, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.VatPercent}" Binding="{Binding VatRate, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Vat}" Binding="{Binding VatAmount, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Net}" Binding="{Binding NetAmount, StringFormat=N2}" Width="110" />
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -184,17 +185,33 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Content="New" Command="{Binding NewSaleCommand}" />
-                        <Button Content="Remove Item" Margin="8,0,0,0" Command="{Binding RemoveItemCommand}" />
-                        <Button Content="Save" Margin="8,0,0,0" Command="{Binding AddOrUpdateSaleCommand}" Style="{StaticResource PrimaryButtonStyle}" />
-                        <Button Content="Delete" Margin="8,0,0,0" Command="{Binding DeleteSaleCommand}" />
+                        <Button Content="{l10n:L10n Common.New}" Command="{Binding NewSaleCommand}" />
+                        <Button Content="{l10n:L10n Common.RemoveItem}" Margin="8,0,0,0" Command="{Binding RemoveItemCommand}" />
+                        <Button Content="{l10n:L10n Common.Save}" Margin="8,0,0,0" Command="{Binding AddOrUpdateSaleCommand}" Style="{StaticResource PrimaryButtonStyle}" />
+                        <Button Content="{l10n:L10n Common.Delete}" Margin="8,0,0,0" Command="{Binding DeleteSaleCommand}" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Right">
-                        <TextBlock Text="{Binding Subtotal, StringFormat='Subtotal: {0:N2}'}" />
-                        <TextBlock Text="{Binding DiscountTotal, StringFormat='Discount: {0:N2}'}" />
-                        <TextBlock Text="{Binding VatTotal, StringFormat='VAT: {0:N2}'}" />
-                        <TextBlock Text="{Binding TotalAmount, StringFormat='Net Total: {0:N2}'}" FontWeight="SemiBold" />
+                        <TextBlock>
+                            <Run Text="{l10n:L10n Sales.Subtotal}" />
+                            <Run Text=": " />
+                            <Run Text="{Binding Subtotal, StringFormat=N2}" />
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="{l10n:L10n Common.Discount}" />
+                            <Run Text=": " />
+                            <Run Text="{Binding DiscountTotal, StringFormat=N2}" />
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="{l10n:L10n Common.Vat}" />
+                            <Run Text=": " />
+                            <Run Text="{Binding VatTotal, StringFormat=N2}" />
+                        </TextBlock>
+                        <TextBlock FontWeight="SemiBold">
+                            <Run Text="{l10n:L10n Sales.NetTotal}" />
+                            <Run Text=": " />
+                            <Run Text="{Binding TotalAmount, StringFormat=N2}" />
+                        </TextBlock>
                         <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
                     </StackPanel>
                 </Grid>

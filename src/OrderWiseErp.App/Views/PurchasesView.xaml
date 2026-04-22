@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l10n="clr-namespace:OrderWiseErp.App.Infrastructure"
              mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -11,17 +12,17 @@
             <ColumnDefinition Width="2*" />
         </Grid.ColumnDefinitions>
 
-        <GroupBox Grid.Column="0" Header="Purchases">
+        <GroupBox Grid.Column="0" Header="{l10n:L10n Purchases.ListHeader}">
             <DataGrid ItemsSource="{Binding Purchases}"
                       SelectedItem="{Binding SelectedPurchase}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="#" Binding="{Binding PurchaseNo}" Width="120" />
-                    <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=d}" Width="110" />
-                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat=N2}" Width="110" />
-                    <DataGridTextColumn Header="Balance" Binding="{Binding Balance, StringFormat=N2}" Width="110" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.InvoiceNo}" Binding="{Binding PurchaseNo}" Width="120" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.Date}" Binding="{Binding Date, StringFormat=d}" Width="110" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.Total}" Binding="{Binding TotalAmount, StringFormat=N2}" Width="110" />
+                    <DataGridTextColumn Header="{l10n:L10n Common.Balance}" Binding="{Binding Balance, StringFormat=N2}" Width="110" />
                 </DataGrid.Columns>
             </DataGrid>
         </GroupBox>
@@ -50,9 +51,9 @@
                         <ColumnDefinition Width="120" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Invoice #" VerticalAlignment="Center" />
+                    <TextBlock Text="{l10n:L10n Common.InvoiceNo}" VerticalAlignment="Center" />
                     <TextBox Grid.Column="1" Margin="8,0,14,0" Text="{Binding PurchaseNoInput, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Grid.Column="2" Text="Date" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{l10n:L10n Common.Date}" VerticalAlignment="Center" />
                     <DatePicker Grid.Column="3" Margin="8,0,0,0" SelectedDate="{Binding DateInput}" />
                 </Grid>
 
@@ -63,12 +64,12 @@
                         <ColumnDefinition Width="120" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Project" VerticalAlignment="Center" />
+                    <TextBlock Text="{l10n:L10n Common.Project}" VerticalAlignment="Center" />
                     <ComboBox Grid.Column="1"
                               Margin="8,0,14,0"
                               ItemsSource="{Binding ProjectNumbers}"
                               SelectedItem="{Binding ProjectNoInput}" />
-                    <TextBlock Grid.Column="2" Text="Supplier" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{l10n:L10n Common.Supplier}" VerticalAlignment="Center" />
                     <ComboBox Grid.Column="3"
                               Margin="8,0,0,0"
                               ItemsSource="{Binding SupplierNames}"
@@ -82,9 +83,9 @@
                         <ColumnDefinition Width="120" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Term Days" VerticalAlignment="Center" />
+                    <TextBlock Text="{l10n:L10n Common.TermDays}" VerticalAlignment="Center" />
                     <TextBox Grid.Column="1" Margin="8,0,14,0" Text="{Binding TermDaysInput, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Grid.Column="2" Text="Due Date" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{l10n:L10n Common.DueDate}" VerticalAlignment="Center" />
                     <DatePicker Grid.Column="3" Margin="8,0,0,0" SelectedDate="{Binding DueDateInput}" />
                 </Grid>
 
@@ -93,11 +94,11 @@
                         <ColumnDefinition Width="120" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="PO / SOC" VerticalAlignment="Center" />
+                    <TextBlock Text="{l10n:L10n Common.PoSoc}" VerticalAlignment="Center" />
                     <TextBox Grid.Column="1" Margin="8,0,0,0" Text="{Binding PoNumberInput, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
 
-                <GroupBox Grid.Row="4" Header="Line Item" Margin="0,0,0,10">
+                <GroupBox Grid.Row="4" Header="{l10n:L10n Purchases.LineItem}" Margin="0,0,0,10">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="90" />
@@ -124,7 +125,7 @@
                         <TextBox Grid.Column="6" Margin="0,0,8,0" Text="{Binding ItemDutyRateInput, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBox Grid.Column="7" Margin="0,0,8,0" Text="{Binding ItemVatRateInput, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBox Grid.Column="8" Margin="0,0,8,0" Text="{Binding ItemIncomeTaxRateInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Grid.Column="9" Content="Add" Command="{Binding AddItemCommand}" />
+                        <Button Grid.Column="9" Content="{l10n:L10n Common.Add}" Command="{Binding AddItemCommand}" />
                     </Grid>
                 </GroupBox>
 
@@ -135,29 +136,29 @@
                           CanUserAddRows="False"
                           IsReadOnly="True">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="SKU" Binding="{Binding Sku}" Width="100" />
-                        <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*" />
-                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="150" />
-                        <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="70" />
-                        <DataGridTextColumn Header="Qty" Binding="{Binding Qty, StringFormat=N2}" Width="80" />
-                        <DataGridTextColumn Header="Rate" Binding="{Binding Rate, StringFormat=N2}" Width="80" />
-                        <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N2}" Width="90" />
-                        <DataGridTextColumn Header="Duty %" Binding="{Binding CustomDuty, StringFormat=N2}" Width="80" />
-                        <DataGridTextColumn Header="Duty" Binding="{Binding CustomDutyAmount, StringFormat=N2}" Width="80" />
-                        <DataGridTextColumn Header="VAT %" Binding="{Binding VatRate, StringFormat=N2}" Width="80" />
-                        <DataGridTextColumn Header="VAT" Binding="{Binding VatAmount, StringFormat=N2}" Width="80" />
-                        <DataGridTextColumn Header="Tax %" Binding="{Binding IncomeTaxRate, StringFormat=N2}" Width="80" />
-                        <DataGridTextColumn Header="Tax" Binding="{Binding IncomeTaxAmount, StringFormat=N2}" Width="80" />
-                        <DataGridTextColumn Header="Net" Binding="{Binding NetAmount, StringFormat=N2}" Width="100" />
+                        <DataGridTextColumn Header="{l10n:L10n Products.Sku}" Binding="{Binding Sku}" Width="100" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Product}" Binding="{Binding ProductName}" Width="*" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Description}" Binding="{Binding Description}" Width="150" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Unit}" Binding="{Binding Unit}" Width="70" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Qty}" Binding="{Binding Qty, StringFormat=N2}" Width="80" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Rate}" Binding="{Binding Rate, StringFormat=N2}" Width="80" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Amount}" Binding="{Binding Amount, StringFormat=N2}" Width="90" />
+                        <DataGridTextColumn Header="{l10n:L10n Purchases.DutyPercent}" Binding="{Binding CustomDuty, StringFormat=N2}" Width="80" />
+                        <DataGridTextColumn Header="{l10n:L10n Purchases.Duty}" Binding="{Binding CustomDutyAmount, StringFormat=N2}" Width="80" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.VatPercent}" Binding="{Binding VatRate, StringFormat=N2}" Width="80" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Vat}" Binding="{Binding VatAmount, StringFormat=N2}" Width="80" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.TaxPercent}" Binding="{Binding IncomeTaxRate, StringFormat=N2}" Width="80" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Tax}" Binding="{Binding IncomeTaxAmount, StringFormat=N2}" Width="80" />
+                        <DataGridTextColumn Header="{l10n:L10n Common.Net}" Binding="{Binding NetAmount, StringFormat=N2}" Width="100" />
                     </DataGrid.Columns>
                 </DataGrid>
 
                 <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                     <TextBlock Text="{Binding GrandTotalSummary}" VerticalAlignment="Center" />
-                    <Button Content="Remove Item" Margin="10,0,0,0" Command="{Binding RemoveItemCommand}" />
-                    <Button Content="New" Margin="8,0,0,0" Command="{Binding NewCommand}" />
-                    <Button Content="Save" Margin="8,0,0,0" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButtonStyle}" />
-                    <Button Content="Delete" Margin="8,0,0,0" Command="{Binding DeleteCommand}" />
+                    <Button Content="{l10n:L10n Common.RemoveItem}" Margin="10,0,0,0" Command="{Binding RemoveItemCommand}" />
+                    <Button Content="{l10n:L10n Common.New}" Margin="8,0,0,0" Command="{Binding NewCommand}" />
+                    <Button Content="{l10n:L10n Common.Save}" Margin="8,0,0,0" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButtonStyle}" />
+                    <Button Content="{l10n:L10n Common.Delete}" Margin="8,0,0,0" Command="{Binding DeleteCommand}" />
                 </StackPanel>
             </Grid>
         </Border>
