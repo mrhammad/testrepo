@@ -505,7 +505,19 @@ public sealed class StockViewModel : ObservableObject
         var contacts = _dataService.GetContacts();
         var products = _dataService.GetProducts();
         _products.Clear();
-        _products.AddRange(products);
+        _products.AddRange(
+            products.Select(
+                x =>
+                    new Product
+                    {
+                        Id = x.Id,
+                        Sku = NormalizeSku(x.Sku),
+                        Name = NormalizeName(x.Name),
+                        Unit = string.IsNullOrWhiteSpace(x.Unit) ? "Nos" : x.Unit.Trim(),
+                        Cost = x.Cost,
+                        SalePrice = x.SalePrice,
+                        VatRate = x.VatRate
+                    }));
 
         var names = contacts
             .Select(x => x.BusinessName)
@@ -527,7 +539,7 @@ public sealed class StockViewModel : ObservableObject
         }
         ReplaceCollection(_locations, locationNames);
 
-        var productNames = products
+        var productNames = _products
             .Select(x => x.Name)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -535,7 +547,7 @@ public sealed class StockViewModel : ObservableObject
             .ToList();
         ReplaceCollection(_productNames, productNames);
 
-        var skus = products
+        var skus = _products
             .Select(x => x.Sku)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -988,9 +1000,9 @@ public sealed class StockViewModel : ObservableObject
 
     private void UpdateAdjustmentSkuSuggestions()
     {
-        var search = AdjustmentItemSkuInput.Trim();
+        var search = NormalizeSku(AdjustmentItemSkuInput);
         var suggestions = ProductSkus
-            .Where(sku => string.IsNullOrWhiteSpace(search) || sku.StartsWith(search, StringComparison.OrdinalIgnoreCase))
+            .Where(sku => string.IsNullOrWhiteSpace(search) || NormalizeSku(sku).StartsWith(search, StringComparison.OrdinalIgnoreCase))
             .Take(30)
             .ToList();
         ReplaceCollection(_adjustmentSkuSuggestions, suggestions);
@@ -999,9 +1011,9 @@ public sealed class StockViewModel : ObservableObject
 
     private void UpdateTransferSkuSuggestions()
     {
-        var search = TransferItemSkuInput.Trim();
+        var search = NormalizeSku(TransferItemSkuInput);
         var suggestions = ProductSkus
-            .Where(sku => string.IsNullOrWhiteSpace(search) || sku.StartsWith(search, StringComparison.OrdinalIgnoreCase))
+            .Where(sku => string.IsNullOrWhiteSpace(search) || NormalizeSku(sku).StartsWith(search, StringComparison.OrdinalIgnoreCase))
             .Take(30)
             .ToList();
         ReplaceCollection(_transferSkuSuggestions, suggestions);
@@ -1010,22 +1022,22 @@ public sealed class StockViewModel : ObservableObject
 
     private Product? FindProductBySkuOrName(string skuInput, string productNameInput)
     {
-        var normalizedSku = skuInput.Trim();
+        var normalizedSku = NormalizeSku(skuInput);
         if (!string.IsNullOrWhiteSpace(normalizedSku))
         {
             var bySku = _products.FirstOrDefault(x =>
-                string.Equals(x.Sku, normalizedSku, StringComparison.OrdinalIgnoreCase));
+                string.Equals(NormalizeSku(x.Sku), normalizedSku, StringComparison.OrdinalIgnoreCase));
             if (bySku is not null)
             {
                 return bySku;
             }
         }
 
-        var normalizedName = productNameInput.Trim();
+        var normalizedName = NormalizeName(productNameInput);
         if (!string.IsNullOrWhiteSpace(normalizedName))
         {
             return _products.FirstOrDefault(x =>
-                string.Equals(x.Name, normalizedName, StringComparison.OrdinalIgnoreCase));
+                string.Equals(NormalizeName(x.Name), normalizedName, StringComparison.OrdinalIgnoreCase));
         }
 
         return null;
@@ -1038,14 +1050,14 @@ public sealed class StockViewModel : ObservableObject
             return;
         }
 
-        var sku = AdjustmentItemSkuInput.Trim();
+        var sku = NormalizeSku(AdjustmentItemSkuInput);
         if (string.IsNullOrWhiteSpace(sku))
         {
             return;
         }
 
         var match = _products.FirstOrDefault(x =>
-            string.Equals(x.Sku, sku, StringComparison.OrdinalIgnoreCase));
+            string.Equals(NormalizeSku(x.Sku), sku, StringComparison.OrdinalIgnoreCase));
         if (match is null)
         {
             return;
@@ -1054,6 +1066,7 @@ public sealed class StockViewModel : ObservableObject
         _isSyncingSkuAndProduct = true;
         try
         {
+            AdjustmentItemSkuInput = NormalizeSku(match.Sku);
             AdjustmentItemProductNameInput = match.Name;
         }
         finally
@@ -1069,14 +1082,14 @@ public sealed class StockViewModel : ObservableObject
             return;
         }
 
-        var productName = AdjustmentItemProductNameInput.Trim();
+        var productName = NormalizeName(AdjustmentItemProductNameInput);
         if (string.IsNullOrWhiteSpace(productName))
         {
             return;
         }
 
         var match = _products.FirstOrDefault(x =>
-            string.Equals(x.Name, productName, StringComparison.OrdinalIgnoreCase));
+            string.Equals(NormalizeName(x.Name), productName, StringComparison.OrdinalIgnoreCase));
         if (match is null)
         {
             return;
@@ -1085,7 +1098,7 @@ public sealed class StockViewModel : ObservableObject
         _isSyncingSkuAndProduct = true;
         try
         {
-            AdjustmentItemSkuInput = match.Sku;
+            AdjustmentItemSkuInput = NormalizeSku(match.Sku);
         }
         finally
         {
@@ -1100,14 +1113,14 @@ public sealed class StockViewModel : ObservableObject
             return;
         }
 
-        var sku = TransferItemSkuInput.Trim();
+        var sku = NormalizeSku(TransferItemSkuInput);
         if (string.IsNullOrWhiteSpace(sku))
         {
             return;
         }
 
         var match = _products.FirstOrDefault(x =>
-            string.Equals(x.Sku, sku, StringComparison.OrdinalIgnoreCase));
+            string.Equals(NormalizeSku(x.Sku), sku, StringComparison.OrdinalIgnoreCase));
         if (match is null)
         {
             return;
@@ -1116,6 +1129,7 @@ public sealed class StockViewModel : ObservableObject
         _isSyncingSkuAndProduct = true;
         try
         {
+            TransferItemSkuInput = NormalizeSku(match.Sku);
             TransferItemProductNameInput = match.Name;
         }
         finally
@@ -1131,14 +1145,14 @@ public sealed class StockViewModel : ObservableObject
             return;
         }
 
-        var productName = TransferItemProductNameInput.Trim();
+        var productName = NormalizeName(TransferItemProductNameInput);
         if (string.IsNullOrWhiteSpace(productName))
         {
             return;
         }
 
         var match = _products.FirstOrDefault(x =>
-            string.Equals(x.Name, productName, StringComparison.OrdinalIgnoreCase));
+            string.Equals(NormalizeName(x.Name), productName, StringComparison.OrdinalIgnoreCase));
         if (match is null)
         {
             return;
@@ -1147,12 +1161,24 @@ public sealed class StockViewModel : ObservableObject
         _isSyncingSkuAndProduct = true;
         try
         {
-            TransferItemSkuInput = match.Sku;
+            TransferItemSkuInput = NormalizeSku(match.Sku);
         }
         finally
         {
             _isSyncingSkuAndProduct = false;
         }
+    }
+
+    private static string NormalizeSku(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : value.Trim().ToUpperInvariant();
+    }
+
+    private static string NormalizeName(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
     }
 
     private static bool ContainsIgnoreCase(string? value, string term)

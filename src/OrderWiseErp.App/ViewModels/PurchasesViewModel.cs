@@ -185,11 +185,7 @@ public sealed class PurchasesViewModel : ObservableObject
         get => _itemNameInput;
         set
         {
-            if (!SetProperty(ref _itemNameInput, value))
-            {
-                return;
-            }
-
+            SetProperty(ref _itemNameInput, value);
             SyncSkuFromItemName();
         }
     }
@@ -199,11 +195,7 @@ public sealed class PurchasesViewModel : ObservableObject
         get => _itemSkuInput;
         set
         {
-            if (!SetProperty(ref _itemSkuInput, value))
-            {
-                return;
-            }
-
+            SetProperty(ref _itemSkuInput, value);
             UpdateSkuSuggestions();
             SyncItemNameFromSku();
         }
@@ -340,9 +332,18 @@ public sealed class PurchasesViewModel : ObservableObject
             .OrderBy(x => x.Sku)
             .ToList();
         _products.Clear();
-        _products.AddRange(productNames);
+        _products.AddRange(
+            productNames.Select(
+                x =>
+                    new Product
+                    {
+                        Id = x.Id,
+                        Sku = NormalizeSku(x.Sku),
+                        Name = NormalizeName(x.Name),
+                        Unit = string.IsNullOrWhiteSpace(x.Unit) ? "Nos" : x.Unit.Trim()
+                    }));
 
-        var names = productNames
+        var names = _products
             .Select(x => x.Name)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -354,7 +355,7 @@ public sealed class PurchasesViewModel : ObservableObject
             _productNames.Add(productName);
         }
 
-        var skus = productNames
+        var skus = _products
             .Select(x => x.Sku)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -469,9 +470,9 @@ public sealed class PurchasesViewModel : ObservableObject
 
     private void AddItem()
     {
-        if (string.IsNullOrWhiteSpace(ItemNameInput))
+        if (string.IsNullOrWhiteSpace(ItemNameInput) && string.IsNullOrWhiteSpace(ItemSkuInput))
         {
-            Message = "Item name is required.";
+            Message = "Item SKU or product name is required.";
             return;
         }
 
@@ -588,20 +589,20 @@ public sealed class PurchasesViewModel : ObservableObject
 
     private Product? FindProductBySkuOrName(string skuInput, string nameInput)
     {
-        var sku = skuInput.Trim();
+        var sku = NormalizeSku(skuInput);
         if (!string.IsNullOrWhiteSpace(sku))
         {
-            var bySku = _products.FirstOrDefault(x => string.Equals(x.Sku, sku, StringComparison.OrdinalIgnoreCase));
+            var bySku = _products.FirstOrDefault(x => string.Equals(NormalizeSku(x.Sku), sku, StringComparison.OrdinalIgnoreCase));
             if (bySku is not null)
             {
                 return bySku;
             }
         }
 
-        var name = nameInput.Trim();
+        var name = NormalizeName(nameInput);
         if (!string.IsNullOrWhiteSpace(name))
         {
-            return _products.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+            return _products.FirstOrDefault(x => string.Equals(NormalizeName(x.Name), name, StringComparison.OrdinalIgnoreCase));
         }
 
         return null;
@@ -609,9 +610,9 @@ public sealed class PurchasesViewModel : ObservableObject
 
     private void UpdateSkuSuggestions()
     {
-        var search = ItemSkuInput.Trim();
+        var search = NormalizeSku(ItemSkuInput);
         var suggestions = ProductSkus
-            .Where(sku => string.IsNullOrWhiteSpace(search) || sku.StartsWith(search, StringComparison.OrdinalIgnoreCase))
+            .Where(sku => string.IsNullOrWhiteSpace(search) || NormalizeSku(sku).StartsWith(search, StringComparison.OrdinalIgnoreCase))
             .Take(30)
             .ToList();
 
@@ -631,13 +632,13 @@ public sealed class PurchasesViewModel : ObservableObject
             return;
         }
 
-        var sku = ItemSkuInput.Trim();
+        var sku = NormalizeSku(ItemSkuInput);
         if (string.IsNullOrWhiteSpace(sku))
         {
             return;
         }
 
-        var product = _products.FirstOrDefault(x => string.Equals(x.Sku, sku, StringComparison.OrdinalIgnoreCase));
+        var product = _products.FirstOrDefault(x => string.Equals(NormalizeSku(x.Sku), sku, StringComparison.OrdinalIgnoreCase));
         if (product is null)
         {
             return;
@@ -646,6 +647,7 @@ public sealed class PurchasesViewModel : ObservableObject
         _isSyncingSkuAndProduct = true;
         try
         {
+            ItemSkuInput = NormalizeSku(product.Sku);
             ItemNameInput = product.Name;
         }
         finally
@@ -661,13 +663,13 @@ public sealed class PurchasesViewModel : ObservableObject
             return;
         }
 
-        var name = ItemNameInput.Trim();
+        var name = NormalizeName(ItemNameInput);
         if (string.IsNullOrWhiteSpace(name))
         {
             return;
         }
 
-        var product = _products.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+        var product = _products.FirstOrDefault(x => string.Equals(NormalizeName(x.Name), name, StringComparison.OrdinalIgnoreCase));
         if (product is null)
         {
             return;
@@ -676,7 +678,7 @@ public sealed class PurchasesViewModel : ObservableObject
         _isSyncingSkuAndProduct = true;
         try
         {
-            ItemSkuInput = product.Sku;
+            ItemSkuInput = NormalizeSku(product.Sku);
         }
         finally
         {
@@ -704,5 +706,17 @@ public sealed class PurchasesViewModel : ObservableObject
             IncomeTaxAmount = source.IncomeTaxAmount,
             NetAmount = source.NetAmount
         };
+    }
+
+    private static string NormalizeSku(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : value.Trim().ToUpperInvariant();
+    }
+
+    private static string NormalizeName(string? value)
+    {
+        return (value ?? string.Empty).Trim();
     }
 }
