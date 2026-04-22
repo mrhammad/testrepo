@@ -49,7 +49,7 @@
                                TextWrapping="Wrap" />
                     <TextBlock Margin="0,8,0,0"
                                Foreground="{StaticResource MutedTextBrush}"
-                               Text="{Binding LastUpdatedDisplay}" />
+                               Text="{Binding LastUpdatedLabel}" />
                 </StackPanel>
             </Border>
         </DataTemplate>
