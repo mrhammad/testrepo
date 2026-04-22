@@ -114,45 +114,64 @@
 
                 <GroupBox Grid.Row="4" Header="{l10n:L10n Sales.AddLineItem}" Margin="0,0,0,10">
                     <Grid Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="70" />
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="2.2*" />
+                            <ColumnDefinition Width="0.9*" />
+                            <ColumnDefinition Width="0.8*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="2.2*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{l10n:L10n Common.Name}" VerticalAlignment="Center" />
-                        <ComboBox Grid.Column="1"
-                                  Margin="8,0"
+
+                        <TextBlock Text="{l10n:L10n Common.Product}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="1" Text="{l10n:L10n Common.Qty}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="2" Text="{l10n:L10n Common.Unit}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="3" Text="{l10n:L10n Common.Rate}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="4" Text="{l10n:L10n Common.DiscountPercent}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="5" Text="{l10n:L10n Common.VatPercent}" Margin="0,0,8,4" />
+                        <TextBlock Grid.Column="6" Text="{l10n:L10n Common.Description}" Margin="0,0,8,4" />
+
+                        <ComboBox Grid.Row="1"
+                                  Grid.Column="0"
+                                  Margin="0,0,8,0"
                                   ItemsSource="{Binding Products}"
                                   DisplayMemberPath="Name"
                                   SelectedValuePath="Id"
                                   SelectedValue="{Binding SelectedProductId}" />
-                        <TextBox Grid.Column="2"
-                                 Margin="8,0"
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="1"
+                                 Margin="0,0,8,0"
                                  Text="{Binding QtyInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="3"
-                                 Margin="8,0"
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="2"
+                                 Margin="0,0,8,0"
                                  Text="{Binding UnitInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="4"
-                                 Margin="8,0"
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="3"
+                                 Margin="0,0,8,0"
                                  Text="{Binding RateInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="5"
-                                 Margin="8,0"
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="4"
+                                 Margin="0,0,8,0"
                                  Text="{Binding DiscountPercentInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="6"
-                                 Margin="8,0"
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="5"
+                                 Margin="0,0,8,0"
                                  Text="{Binding VatRateInput, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Grid.Column="7"
-                                 Margin="8,0"
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="6"
+                                 Margin="0,0,8,0"
                                  Text="{Binding ItemDescription, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Grid.Column="8"
+                        <Button Grid.Row="1"
+                                Grid.Column="7"
+                                MinWidth="88"
                                 Content="{l10n:L10n Common.Add}"
-                                Margin="8,0,0,0"
                                 Command="{Binding AddItemCommand}" />
                     </Grid>
                 </GroupBox>
