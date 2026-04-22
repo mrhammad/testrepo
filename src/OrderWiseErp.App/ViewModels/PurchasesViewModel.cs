@@ -8,6 +8,10 @@ namespace OrderWiseErp.App.ViewModels;
 public sealed class PurchasesViewModel : ObservableObject
 {
     private readonly IAppDataService _dataService;
+    private readonly List<Product> _products = [];
+    private readonly ObservableCollection<string> _productSkus = [];
+    private readonly ObservableCollection<string> _itemSkuSuggestions = [];
+    private bool _isSyncingSkuAndProduct;
     private readonly ObservableCollection<string> _supplierNames = [];
     private readonly ObservableCollection<string> _projectNumbers = [];
     private readonly ObservableCollection<string> _productNames = [];
@@ -46,6 +50,8 @@ public sealed class PurchasesViewModel : ObservableObject
         SupplierNames = new ReadOnlyObservableCollection<string>(_supplierNames);
         ProjectNumbers = new ReadOnlyObservableCollection<string>(_projectNumbers);
         ProductNames = new ReadOnlyObservableCollection<string>(_productNames);
+        ProductSkus = new ReadOnlyObservableCollection<string>(_productSkus);
+        ItemSkuSuggestions = new ReadOnlyObservableCollection<string>(_itemSkuSuggestions);
 
         NewCommand = new RelayCommand(StartNew);
         SaveCommand = new RelayCommand(SaveDraft);
@@ -68,6 +74,10 @@ public sealed class PurchasesViewModel : ObservableObject
     public ReadOnlyObservableCollection<string> ProjectNumbers { get; }
 
     public ReadOnlyObservableCollection<string> ProductNames { get; }
+
+    public ReadOnlyObservableCollection<string> ProductSkus { get; }
+
+    public ReadOnlyObservableCollection<string> ItemSkuSuggestions { get; }
 
     public RelayCommand NewCommand { get; }
 
@@ -173,13 +183,30 @@ public sealed class PurchasesViewModel : ObservableObject
     public string ItemNameInput
     {
         get => _itemNameInput;
-        set => SetProperty(ref _itemNameInput, value);
+        set
+        {
+            if (!SetProperty(ref _itemNameInput, value))
+            {
+                return;
+            }
+
+            SyncSkuFromItemName();
+        }
     }
 
     public string ItemSkuInput
     {
         get => _itemSkuInput;
-        set => SetProperty(ref _itemSkuInput, value);
+        set
+        {
+            if (!SetProperty(ref _itemSkuInput, value))
+            {
+                return;
+            }
+
+            UpdateSkuSuggestions();
+            SyncItemNameFromSku();
+        }
     }
 
     public string ItemQtyInput
@@ -261,6 +288,9 @@ public sealed class PurchasesViewModel : ObservableObject
     public string GrandTotalSummary =>
         $"Subtotal: {Subtotal:N2} | VAT: {VatTotal:N2} | Duty: {DutyTotal:N2} | Income Tax: {IncomeTaxTotal:N2} | Total: {GrandTotal:N2}";
 
+    public bool IsItemSkuSuggestionOpen =>
+        !string.IsNullOrWhiteSpace(ItemSkuInput) && ItemSkuSuggestions.Count > 0;
+
     public string Message
     {
         get => _message;
@@ -307,16 +337,36 @@ public sealed class PurchasesViewModel : ObservableObject
         }
 
         var productNames = _dataService.GetProducts()
+            .OrderBy(x => x.Sku)
+            .ToList();
+        _products.Clear();
+        _products.AddRange(productNames);
+
+        var names = productNames
             .Select(x => x.Name)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(x => x)
             .ToList();
         _productNames.Clear();
-        foreach (var productName in productNames)
+        foreach (var productName in names)
         {
             _productNames.Add(productName);
         }
+
+        var skus = productNames
+            .Select(x => x.Sku)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x)
+            .ToList();
+        _productSkus.Clear();
+        foreach (var sku in skus)
+        {
+            _productSkus.Add(sku);
+        }
+
+        UpdateSkuSuggestions();
     }
 
     private void StartNew()
@@ -331,8 +381,8 @@ public sealed class PurchasesViewModel : ObservableObject
         TermDaysInput = string.Empty;
         DraftItems.Clear();
         SelectedDraftItem = null;
+        ItemSkuInput = ProductSkus.FirstOrDefault() ?? string.Empty;
         ItemNameInput = ProductNames.FirstOrDefault() ?? string.Empty;
-        ItemSkuInput = string.Empty;
         ItemDescriptionInput = string.Empty;
         ItemQtyInput = string.Empty;
         ItemUnitInput = "Nos";
@@ -441,11 +491,12 @@ public sealed class PurchasesViewModel : ObservableObject
             return;
         }
 
-        var products = _dataService.GetProducts();
-        var product = products.FirstOrDefault(x =>
-            string.Equals(x.Name, ItemNameInput.Trim(), StringComparison.OrdinalIgnoreCase) ||
-            (!string.IsNullOrWhiteSpace(ItemSkuInput) &&
-             string.Equals(x.Sku, ItemSkuInput.Trim(), StringComparison.OrdinalIgnoreCase)));
+        var product = FindProductBySkuOrName(ItemSkuInput, ItemNameInput);
+        if (product is null)
+        {
+            Message = "Select an existing product SKU/name from Products module.";
+            return;
+        }
 
         var amount = qty * rate;
         var vatAmount = amount * (vatRate / 100m);
@@ -456,12 +507,12 @@ public sealed class PurchasesViewModel : ObservableObject
         DraftItems.Add(
             new PurchaseItem
             {
-                ProductId = product?.Id ?? 0,
-                Sku = string.IsNullOrWhiteSpace(ItemSkuInput) ? product?.Sku ?? string.Empty : ItemSkuInput.Trim(),
-                ProductName = ItemNameInput.Trim(),
-                Description = string.IsNullOrWhiteSpace(ItemDescriptionInput) ? ItemNameInput.Trim() : ItemDescriptionInput.Trim(),
+                ProductId = product.Id,
+                Sku = product.Sku,
+                ProductName = product.Name,
+                Description = string.IsNullOrWhiteSpace(ItemDescriptionInput) ? product.Name : ItemDescriptionInput.Trim(),
                 Qty = qty,
-                Unit = string.IsNullOrWhiteSpace(ItemUnitInput) ? "Nos" : ItemUnitInput.Trim(),
+                Unit = string.IsNullOrWhiteSpace(ItemUnitInput) ? product.Unit : ItemUnitInput.Trim(),
                 Rate = rate,
                 Amount = amount,
                 CustomDuty = dutyRate,
@@ -472,8 +523,8 @@ public sealed class PurchasesViewModel : ObservableObject
                 NetAmount = netAmount
             });
 
+        ItemSkuInput = ProductSkus.FirstOrDefault() ?? string.Empty;
         ItemNameInput = ProductNames.FirstOrDefault() ?? string.Empty;
-        ItemSkuInput = string.Empty;
         ItemDescriptionInput = string.Empty;
         ItemQtyInput = string.Empty;
         ItemUnitInput = "Nos";
@@ -533,6 +584,104 @@ public sealed class PurchasesViewModel : ObservableObject
         }
 
         return int.TryParse(value, out result);
+    }
+
+    private Product? FindProductBySkuOrName(string skuInput, string nameInput)
+    {
+        var sku = skuInput.Trim();
+        if (!string.IsNullOrWhiteSpace(sku))
+        {
+            var bySku = _products.FirstOrDefault(x => string.Equals(x.Sku, sku, StringComparison.OrdinalIgnoreCase));
+            if (bySku is not null)
+            {
+                return bySku;
+            }
+        }
+
+        var name = nameInput.Trim();
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            return _products.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return null;
+    }
+
+    private void UpdateSkuSuggestions()
+    {
+        var search = ItemSkuInput.Trim();
+        var suggestions = ProductSkus
+            .Where(sku => string.IsNullOrWhiteSpace(search) || sku.StartsWith(search, StringComparison.OrdinalIgnoreCase))
+            .Take(30)
+            .ToList();
+
+        _itemSkuSuggestions.Clear();
+        foreach (var suggestion in suggestions)
+        {
+            _itemSkuSuggestions.Add(suggestion);
+        }
+
+        OnPropertyChanged(nameof(IsItemSkuSuggestionOpen));
+    }
+
+    private void SyncItemNameFromSku()
+    {
+        if (_isSyncingSkuAndProduct)
+        {
+            return;
+        }
+
+        var sku = ItemSkuInput.Trim();
+        if (string.IsNullOrWhiteSpace(sku))
+        {
+            return;
+        }
+
+        var product = _products.FirstOrDefault(x => string.Equals(x.Sku, sku, StringComparison.OrdinalIgnoreCase));
+        if (product is null)
+        {
+            return;
+        }
+
+        _isSyncingSkuAndProduct = true;
+        try
+        {
+            ItemNameInput = product.Name;
+        }
+        finally
+        {
+            _isSyncingSkuAndProduct = false;
+        }
+    }
+
+    private void SyncSkuFromItemName()
+    {
+        if (_isSyncingSkuAndProduct)
+        {
+            return;
+        }
+
+        var name = ItemNameInput.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        var product = _products.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+        if (product is null)
+        {
+            return;
+        }
+
+        _isSyncingSkuAndProduct = true;
+        try
+        {
+            ItemSkuInput = product.Sku;
+        }
+        finally
+        {
+            _isSyncingSkuAndProduct = false;
+        }
     }
 
     private static PurchaseItem CloneItem(PurchaseItem source)

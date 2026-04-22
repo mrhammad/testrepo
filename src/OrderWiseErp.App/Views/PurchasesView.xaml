@@ -127,10 +127,15 @@
                         <TextBlock Grid.Column="7" Text="{l10n:L10n Common.VatPercent}" Margin="0,0,8,4" />
                         <TextBlock Grid.Column="8" Text="{l10n:L10n Common.TaxPercent}" Margin="0,0,8,4" />
 
-                        <TextBox Grid.Row="1"
-                                 Grid.Column="0"
-                                 Margin="0,0,8,0"
-                                 Text="{Binding ItemSkuInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <ComboBox Grid.Row="1"
+                                  Grid.Column="0"
+                                  Margin="0,0,8,0"
+                                  IsEditable="True"
+                                  IsTextSearchEnabled="False"
+                                  StaysOpenOnEdit="True"
+                                  IsDropDownOpen="{Binding IsItemSkuSuggestionOpen, Mode=OneWay}"
+                                  ItemsSource="{Binding ItemSkuSuggestions}"
+                                  Text="{Binding ItemSkuInput, UpdateSourceTrigger=PropertyChanged}" />
                         <ComboBox Grid.Row="1"
                                   Grid.Column="1"
                                   Margin="0,0,8,0"
