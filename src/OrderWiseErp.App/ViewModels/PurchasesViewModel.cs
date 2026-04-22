@@ -654,6 +654,8 @@ public sealed class PurchasesViewModel : ObservableObject
         {
             _isSyncingSkuAndProduct = false;
         }
+
+        ApplyProductDefaults(product);
     }
 
     private void SyncSkuFromItemName()
@@ -684,6 +686,14 @@ public sealed class PurchasesViewModel : ObservableObject
         {
             _isSyncingSkuAndProduct = false;
         }
+
+        ApplyProductDefaults(product);
+    }
+
+    private void ApplyProductDefaults(Product product)
+    {
+        ItemUnitInput = string.IsNullOrWhiteSpace(product.Unit) ? "Nos" : product.Unit.Trim();
+        ItemRateInput = product.Cost.ToString("0.##");
     }
 
     private static PurchaseItem CloneItem(PurchaseItem source)
