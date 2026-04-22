@@ -8,6 +8,8 @@ namespace OrderWiseErp.App.ViewModels;
 public sealed class StockViewModel : ObservableObject
 {
     private readonly IAppDataService _dataService;
+    private readonly List<Product> _products = [];
+    private bool _isSyncingSkuAndProduct;
 
     private readonly ObservableCollection<StockAdjustment> _stockAdjustments = [];
     private readonly ObservableCollection<StockTransfer> _stockTransfers = [];
@@ -17,6 +19,8 @@ public sealed class StockViewModel : ObservableObject
     private readonly ObservableCollection<string> _locations = [];
     private readonly ObservableCollection<string> _productNames = [];
     private readonly ObservableCollection<string> _productSkus = [];
+    private readonly ObservableCollection<string> _adjustmentSkuSuggestions = [];
+    private readonly ObservableCollection<string> _transferSkuSuggestions = [];
 
     private StockAdjustment? _selectedAdjustment;
     private StockAdjustmentItem? _selectedAdjustmentItem;
@@ -75,6 +79,8 @@ public sealed class StockViewModel : ObservableObject
         Locations = new ReadOnlyObservableCollection<string>(_locations);
         ProductNames = new ReadOnlyObservableCollection<string>(_productNames);
         ProductSkus = new ReadOnlyObservableCollection<string>(_productSkus);
+        AdjustmentSkuSuggestions = new ReadOnlyObservableCollection<string>(_adjustmentSkuSuggestions);
+        TransferSkuSuggestions = new ReadOnlyObservableCollection<string>(_transferSkuSuggestions);
 
         AdjustmentTypes = new ReadOnlyCollection<string>(["Increase", "Decrease", "Damage", "Correction"]);
         TransferStatuses = new ReadOnlyCollection<string>(["Pending", "In-Transit", "Completed"]);
@@ -119,6 +125,10 @@ public sealed class StockViewModel : ObservableObject
     public ReadOnlyObservableCollection<string> ProductNames { get; }
 
     public ReadOnlyObservableCollection<string> ProductSkus { get; }
+
+    public ReadOnlyObservableCollection<string> AdjustmentSkuSuggestions { get; }
+
+    public ReadOnlyObservableCollection<string> TransferSkuSuggestions { get; }
 
     public ReadOnlyCollection<string> AdjustmentTypes { get; }
 
@@ -327,13 +337,30 @@ public sealed class StockViewModel : ObservableObject
     public string AdjustmentItemSkuInput
     {
         get => _adjustmentItemSkuInput;
-        set => SetProperty(ref _adjustmentItemSkuInput, value);
+        set
+        {
+            if (!SetProperty(ref _adjustmentItemSkuInput, value))
+            {
+                return;
+            }
+
+            UpdateAdjustmentSkuSuggestions();
+            SyncAdjustmentProductFromSku();
+        }
     }
 
     public string AdjustmentItemProductNameInput
     {
         get => _adjustmentItemProductNameInput;
-        set => SetProperty(ref _adjustmentItemProductNameInput, value);
+        set
+        {
+            if (!SetProperty(ref _adjustmentItemProductNameInput, value))
+            {
+                return;
+            }
+
+            SyncAdjustmentSkuFromProductName();
+        }
     }
 
     public string AdjustmentItemQtyInput
@@ -405,13 +432,30 @@ public sealed class StockViewModel : ObservableObject
     public string TransferItemSkuInput
     {
         get => _transferItemSkuInput;
-        set => SetProperty(ref _transferItemSkuInput, value);
+        set
+        {
+            if (!SetProperty(ref _transferItemSkuInput, value))
+            {
+                return;
+            }
+
+            UpdateTransferSkuSuggestions();
+            SyncTransferProductFromSku();
+        }
     }
 
     public string TransferItemProductNameInput
     {
         get => _transferItemProductNameInput;
-        set => SetProperty(ref _transferItemProductNameInput, value);
+        set
+        {
+            if (!SetProperty(ref _transferItemProductNameInput, value))
+            {
+                return;
+            }
+
+            SyncTransferSkuFromProductName();
+        }
     }
 
     public string TransferItemQtyInput
@@ -450,10 +494,18 @@ public sealed class StockViewModel : ObservableObject
         private set => SetProperty(ref _statusMessage, value);
     }
 
+    public bool IsAdjustmentSkuSuggestionOpen =>
+        !string.IsNullOrWhiteSpace(AdjustmentItemSkuInput) && AdjustmentSkuSuggestions.Count > 0;
+
+    public bool IsTransferSkuSuggestionOpen =>
+        !string.IsNullOrWhiteSpace(TransferItemSkuInput) && TransferSkuSuggestions.Count > 0;
+
     private void RefreshLookups()
     {
         var contacts = _dataService.GetContacts();
         var products = _dataService.GetProducts();
+        _products.Clear();
+        _products.AddRange(products);
 
         var names = contacts
             .Select(x => x.BusinessName)
@@ -490,6 +542,8 @@ public sealed class StockViewModel : ObservableObject
             .OrderBy(x => x)
             .ToList();
         ReplaceCollection(_productSkus, skus);
+        UpdateAdjustmentSkuSuggestions();
+        UpdateTransferSkuSuggestions();
     }
 
     private void RefreshLists()
@@ -594,16 +648,18 @@ public sealed class StockViewModel : ObservableObject
             return;
         }
 
-        var products = _dataService.GetProducts();
-        var product = products.FirstOrDefault(x =>
-            string.Equals(x.Sku, AdjustmentItemSkuInput.Trim(), StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(x.Name, AdjustmentItemProductNameInput.Trim(), StringComparison.OrdinalIgnoreCase));
+        var product = FindProductBySkuOrName(AdjustmentItemSkuInput, AdjustmentItemProductNameInput);
+        if (product is null)
+        {
+            StatusMessage = "Select a valid product SKU from Products.";
+            return;
+        }
 
         var item = new StockAdjustmentItem
         {
-            ProductId = product?.Id ?? 0,
-            Sku = ResolveSku(product?.Sku, AdjustmentItemSkuInput),
-            ProductName = ResolveProductName(product?.Name, AdjustmentItemProductNameInput),
+            ProductId = product.Id,
+            Sku = product.Sku,
+            ProductName = product.Name,
             Qty = qty,
             UnitPrice = unitPrice,
             SubTotal = qty * unitPrice
@@ -730,16 +786,18 @@ public sealed class StockViewModel : ObservableObject
             return;
         }
 
-        var products = _dataService.GetProducts();
-        var product = products.FirstOrDefault(x =>
-            string.Equals(x.Sku, TransferItemSkuInput.Trim(), StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(x.Name, TransferItemProductNameInput.Trim(), StringComparison.OrdinalIgnoreCase));
+        var product = FindProductBySkuOrName(TransferItemSkuInput, TransferItemProductNameInput);
+        if (product is null)
+        {
+            StatusMessage = "Select a valid product SKU from Products.";
+            return;
+        }
 
         var item = new StockTransferItem
         {
-            ProductId = product?.Id ?? 0,
-            Sku = ResolveSku(product?.Sku, TransferItemSkuInput),
-            ProductName = ResolveProductName(product?.Name, TransferItemProductNameInput),
+            ProductId = product.Id,
+            Sku = product.Sku,
+            ProductName = product.Name,
             Qty = qty,
             UnitPrice = unitPrice,
             SubTotal = qty * unitPrice
@@ -928,24 +986,173 @@ public sealed class StockViewModel : ObservableObject
         return $"{prefix}-{DateTime.Now:yyyyMMddHHmmss}".Substring(0, 17);
     }
 
-    private static string ResolveSku(string? productSku, string inputSku)
+    private void UpdateAdjustmentSkuSuggestions()
     {
-        if (!string.IsNullOrWhiteSpace(inputSku))
-        {
-            return inputSku.Trim();
-        }
-
-        return productSku ?? string.Empty;
+        var search = AdjustmentItemSkuInput.Trim();
+        var suggestions = ProductSkus
+            .Where(sku => string.IsNullOrWhiteSpace(search) || sku.StartsWith(search, StringComparison.OrdinalIgnoreCase))
+            .Take(30)
+            .ToList();
+        ReplaceCollection(_adjustmentSkuSuggestions, suggestions);
+        OnPropertyChanged(nameof(IsAdjustmentSkuSuggestionOpen));
     }
 
-    private static string ResolveProductName(string? productName, string inputName)
+    private void UpdateTransferSkuSuggestions()
     {
-        if (!string.IsNullOrWhiteSpace(inputName))
+        var search = TransferItemSkuInput.Trim();
+        var suggestions = ProductSkus
+            .Where(sku => string.IsNullOrWhiteSpace(search) || sku.StartsWith(search, StringComparison.OrdinalIgnoreCase))
+            .Take(30)
+            .ToList();
+        ReplaceCollection(_transferSkuSuggestions, suggestions);
+        OnPropertyChanged(nameof(IsTransferSkuSuggestionOpen));
+    }
+
+    private Product? FindProductBySkuOrName(string skuInput, string productNameInput)
+    {
+        var normalizedSku = skuInput.Trim();
+        if (!string.IsNullOrWhiteSpace(normalizedSku))
         {
-            return inputName.Trim();
+            var bySku = _products.FirstOrDefault(x =>
+                string.Equals(x.Sku, normalizedSku, StringComparison.OrdinalIgnoreCase));
+            if (bySku is not null)
+            {
+                return bySku;
+            }
         }
 
-        return productName ?? string.Empty;
+        var normalizedName = productNameInput.Trim();
+        if (!string.IsNullOrWhiteSpace(normalizedName))
+        {
+            return _products.FirstOrDefault(x =>
+                string.Equals(x.Name, normalizedName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return null;
+    }
+
+    private void SyncAdjustmentProductFromSku()
+    {
+        if (_isSyncingSkuAndProduct)
+        {
+            return;
+        }
+
+        var sku = AdjustmentItemSkuInput.Trim();
+        if (string.IsNullOrWhiteSpace(sku))
+        {
+            return;
+        }
+
+        var match = _products.FirstOrDefault(x =>
+            string.Equals(x.Sku, sku, StringComparison.OrdinalIgnoreCase));
+        if (match is null)
+        {
+            return;
+        }
+
+        _isSyncingSkuAndProduct = true;
+        try
+        {
+            AdjustmentItemProductNameInput = match.Name;
+        }
+        finally
+        {
+            _isSyncingSkuAndProduct = false;
+        }
+    }
+
+    private void SyncAdjustmentSkuFromProductName()
+    {
+        if (_isSyncingSkuAndProduct)
+        {
+            return;
+        }
+
+        var productName = AdjustmentItemProductNameInput.Trim();
+        if (string.IsNullOrWhiteSpace(productName))
+        {
+            return;
+        }
+
+        var match = _products.FirstOrDefault(x =>
+            string.Equals(x.Name, productName, StringComparison.OrdinalIgnoreCase));
+        if (match is null)
+        {
+            return;
+        }
+
+        _isSyncingSkuAndProduct = true;
+        try
+        {
+            AdjustmentItemSkuInput = match.Sku;
+        }
+        finally
+        {
+            _isSyncingSkuAndProduct = false;
+        }
+    }
+
+    private void SyncTransferProductFromSku()
+    {
+        if (_isSyncingSkuAndProduct)
+        {
+            return;
+        }
+
+        var sku = TransferItemSkuInput.Trim();
+        if (string.IsNullOrWhiteSpace(sku))
+        {
+            return;
+        }
+
+        var match = _products.FirstOrDefault(x =>
+            string.Equals(x.Sku, sku, StringComparison.OrdinalIgnoreCase));
+        if (match is null)
+        {
+            return;
+        }
+
+        _isSyncingSkuAndProduct = true;
+        try
+        {
+            TransferItemProductNameInput = match.Name;
+        }
+        finally
+        {
+            _isSyncingSkuAndProduct = false;
+        }
+    }
+
+    private void SyncTransferSkuFromProductName()
+    {
+        if (_isSyncingSkuAndProduct)
+        {
+            return;
+        }
+
+        var productName = TransferItemProductNameInput.Trim();
+        if (string.IsNullOrWhiteSpace(productName))
+        {
+            return;
+        }
+
+        var match = _products.FirstOrDefault(x =>
+            string.Equals(x.Name, productName, StringComparison.OrdinalIgnoreCase));
+        if (match is null)
+        {
+            return;
+        }
+
+        _isSyncingSkuAndProduct = true;
+        try
+        {
+            TransferItemSkuInput = match.Sku;
+        }
+        finally
+        {
+            _isSyncingSkuAndProduct = false;
+        }
     }
 
     private static bool ContainsIgnoreCase(string? value, string term)

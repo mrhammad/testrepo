@@ -187,7 +187,15 @@
                                     <TextBlock Grid.Column="2" Text="{l10n:L10n Common.Qty}" Margin="0,0,8,4" />
                                     <TextBlock Grid.Column="3" Text="{l10n:L10n Stock.UnitPrice}" Margin="0,0,8,4" />
 
-                                    <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,0" Text="{Binding AdjustmentItemSkuInput, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ComboBox Grid.Row="1"
+                                              Grid.Column="0"
+                                              Margin="0,0,8,0"
+                                              IsEditable="True"
+                                              IsTextSearchEnabled="False"
+                                              StaysOpenOnEdit="True"
+                                              IsDropDownOpen="{Binding IsAdjustmentSkuSuggestionOpen, Mode=OneWay}"
+                                              ItemsSource="{Binding AdjustmentSkuSuggestions}"
+                                              Text="{Binding AdjustmentItemSkuInput, UpdateSourceTrigger=PropertyChanged}" />
                                     <ComboBox Grid.Row="1"
                                               Grid.Column="1"
                                               Margin="0,0,8,0"
@@ -449,7 +457,15 @@
                                     <TextBlock Grid.Column="2" Text="{l10n:L10n Common.Qty}" Margin="0,0,8,4" />
                                     <TextBlock Grid.Column="3" Text="{l10n:L10n Stock.UnitPrice}" Margin="0,0,8,4" />
 
-                                    <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,0" Text="{Binding TransferItemSkuInput, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ComboBox Grid.Row="1"
+                                              Grid.Column="0"
+                                              Margin="0,0,8,0"
+                                              IsEditable="True"
+                                              IsTextSearchEnabled="False"
+                                              StaysOpenOnEdit="True"
+                                              IsDropDownOpen="{Binding IsTransferSkuSuggestionOpen, Mode=OneWay}"
+                                              ItemsSource="{Binding TransferSkuSuggestions}"
+                                              Text="{Binding TransferItemSkuInput, UpdateSourceTrigger=PropertyChanged}" />
                                     <ComboBox Grid.Row="1"
                                               Grid.Column="1"
                                               Margin="0,0,8,0"
