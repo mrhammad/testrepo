@@ -5,6 +5,7 @@ This repository now includes a Windows WPF MVVM scaffold for your order-wise ERP
 ## Structure
 
 - `docs/phase1-mvp-screen-plan.md` - MVP modules and screen plan
+- `docs/windows-installer.md` - publish + installer packaging guide
 - `src/OrderWiseErp.App` - WPF app scaffold (`net8.0-windows`)
 
 ## Current MVP modules in the app shell
@@ -45,3 +46,13 @@ This repository now includes a Windows WPF MVVM scaffold for your order-wise ERP
 - This cloud runner does not have the .NET SDK installed, so build verification could not run here.
 - Open this project on a Windows machine with Visual Studio 2022+ and .NET 8 SDK to build and run.
 - The scaffold is intentionally UI-first with placeholder content to speed up iteration.
+
+## Windows installer packaging
+
+Installer files are set up in-repo:
+
+- `installer/OrderWiseErp.iss` (Inno Setup script)
+- `scripts/build-installer.ps1` (publish + compile installer)
+- `scripts/build-installer.bat` (helper wrapper)
+
+See `docs/windows-installer.md` for exact prerequisites and commands.
